@@ -1,25 +1,15 @@
 /**
- * Shared, bank-agnostic domain types used across all modules.
+ * Shared domain types used across modules.
+ *
+ * The canonical `Transaction` type lives in `lib/parsers/types.ts` (it is the
+ * output contract of every bank parser); it is re-exported here for convenience.
  */
 
-/** Identifier for a supported bank. Also stored on each Transaction. */
-export type BankId = "rabobank" | "ing" | "abnamro";
+export type { Transaction } from "@/lib/parsers/types";
+import type { Transaction } from "@/lib/parsers/types";
 
-/** A single bank transaction in a normalized, bank-agnostic shape. */
-export interface Transaction {
-  /** Transaction date as an ISO 8601 date string (YYYY-MM-DD). */
-  date: string;
-  /** Counterparty name as it appears on the statement. */
-  counterparty: string;
-  /** Free-text description / payment reference. */
-  description: string;
-  /** Amount in EUR. Negative = outgoing, positive = incoming. */
-  amount: number;
-  /** Bank this transaction originated from. */
-  bank: BankId;
-  /** Raw CSV row, kept for debugging. */
-  raw?: Record<string, string>;
-}
+/** Identifier for a supported bank. */
+export type BankId = "rabobank" | "ing" | "abnamro";
 
 /** COICOP top-level division codes used by CBS for the CPI. */
 export type CoicopCode =
