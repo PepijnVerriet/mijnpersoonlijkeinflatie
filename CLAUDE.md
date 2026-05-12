@@ -74,3 +74,22 @@ kan PDF, CSV, of XML zijn afhankelijk van de bank. Elke parser is
 verantwoordelijk voor de eigen extractie.
 
 Voor v1: alleen Rabobank PDF rekeningafschriften.
+
+## Huidige status
+
+- Module 4a: Rabobank PDF parser → AF, 33 tests groen, gecommit
+- Module 4b: CBS-koppeling → NOG NIET,
+- Module 4c: Categorizer → NOG NIET
+- Module 4d: Inflatieberekening → NOG NIET
+- Module 4e: UI → NOG NIET
+
+## Open punten voor volgende sessie
+
+- Voor module 4c: iDEAL-transacties tussen vrienden via Rabo Betaalverzoek 
+  hebben geen merchant, alleen een omschrijving (bijv. "Sloffen", 
+  "Stadscafe"). Categorizer moet voor code "id" en "bv" terugvallen op 
+  de description in plaats van de merchant.
+- Voor module 4c: merchant-normalisatie van ec-rijen (Uber, etc) is nu 
+  best-effort. Verbeteren als categorisatie hierop misgaat.
+- CBS API endpoint: https://opendata.cbs.nl/ODataApi/OData/83131NED 
+  (basis 2015=100). Storing tijdens setup, controleren bij start 4b.
