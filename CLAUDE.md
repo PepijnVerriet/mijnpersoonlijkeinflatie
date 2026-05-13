@@ -151,17 +151,24 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 ## Huidige status
 
 - Module 4a: Rabobank PDF parser → AF, 33 tests groen, gecommit
+- Module 4a (filter-fix): interne overboekingen breder uitgefilterd → AF, gecommit
 - Module 4b: CBS-koppeling → AF met mock-laag, gecommit
 - Module 4c-1: Categorizer keyword-engine → AF (78% coverage), gecommit
 - Module 4c-2: Categorizer AI-fallback → AF, 93,9% coverage live, gecommit
 - Module 4d: Inflatieberekening → AF, gecommit
 - Module 4e-1a: Wizard + bank + upload + review → AF, gecommit
 - Module 4e-1b: Categorisatie-correctie → AF, gecommit
-- Module 4e-1c: Resultaat-scherm → BEZIG
+- Module 4e-1c: Resultaat-scherm → AF, gecommit
 - Module 4e-2: Visuele afwerking, content, copywriting → NOG NIET
+- Deployment → NOG NIET
 
 ## Open punten voor volgende sessie
 
+- **Eerste actie morgen**: walkthrough doen met maart 2026 PDF en 
+  verifiëren dat "Schotland" en "Vrij Spaargeld" nu zijn verdwenen uit 
+  de transactie-lijst (parser-filter-fix uit deze sessie).
+- **Daarna**: 4e-2 starten — visuele afwerking, landingspagina, 
+  microcopy, privacy-pagina.
 - Voor module 4c: iDEAL-transacties tussen vrienden via Rabo Betaalverzoek 
   hebben geen merchant, alleen een omschrijving (bijv. "Sloffen", 
   "Stadscafe"). Categorizer moet voor code "id" en "bv" terugvallen op 
