@@ -1,16 +1,19 @@
-import type { CategorizedTransaction, Transaction } from "@/lib/types";
-import type { Categorizer, KeywordRule } from "./types";
+import type { Transaction } from "@/lib/parsers/types";
+import { KEYWORDS } from "./keywords";
+import { matchKeyword } from "./keyword-matcher";
+import type { CategorizationResult } from "./types";
 
-/** Initial keyword rules. Extend as coverage grows. */
-export const keywordRules: readonly KeywordRule[] = [
-  // TODO: add keyword -> COICOP rules, e.g. { match: "albert heijn", coicop: "01", weight: 0.9 }
-];
+/**
+ * Categorise a batch of transactions via the keyword layer. Order in the
+ * input is preserved. Transactions that no rule matches receive
+ * `category: null` and are the input for the AI fallback (module 4c-2).
+ */
+export function categorizeTransactions(
+  transactions: Transaction[],
+): CategorizationResult[] {
+  return transactions.map((t) => matchKeyword(t, KEYWORDS));
+}
 
-/** Categorizer that assigns COICOP codes via keyword matching. */
-export const keywordCategorizer: Categorizer = {
-  categorize(_transactions: Transaction[]): CategorizedTransaction[] {
-    throw new Error("Not implemented");
-  },
-};
-
-export type { Categorizer, KeywordRule } from "./types";
+export { KEYWORDS } from "./keywords";
+export { matchKeyword, buildHaystack, normalizeText } from "./keyword-matcher";
+export type { CategorizationResult, KeywordRule } from "./types";

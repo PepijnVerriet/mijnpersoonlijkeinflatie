@@ -1,16 +1,35 @@
-import type { CategorizedTransaction, CoicopCode, Transaction } from "@/lib/types";
+import type { Transaction } from "@/lib/parsers/types";
+import type { CategoryCode } from "@/lib/cbs/types";
 
-/** Assigns COICOP categories to transactions. */
-export interface Categorizer {
-  categorize(transactions: Transaction[]): CategorizedTransaction[];
+/**
+ * Outcome of categorising a single transaction.
+ *
+ * `category` is `null` when no keyword rule matched. Per CLAUDE.md principle 9
+ * such transactions are the input for the AI-fallback layer (module 4c-2);
+ * until that lands they are simply uncategorised.
+ */
+export interface CategorizationResult {
+  transaction: Transaction;
+  category: CategoryCode | null;
+  /** Who made the assignment. `keyword` is also used when category is null. */
+  source: "keyword" | "ai" | "user";
+  /** Which keyword fired (for debugging / explainability). */
+  matchedKeyword?: string;
 }
 
-/** A single keyword rule mapping a substring to a COICOP code. */
+/**
+ * A single keyword → category rule.
+ *
+ * `keyword` is matched case-insensitively and with diacritics folded
+ * (so "univé" matches "Unive" and vice-versa). The matcher uses
+ * word-boundary matching, so short keys like "ah" or "cz" are safe.
+ *
+ * Order matters: when more than one rule could match, the *first* rule
+ * in the array wins. List specific rules before generic ones.
+ */
 export interface KeywordRule {
-  /** Lower-cased substring searched for in counterparty / description. */
-  match: string;
-  /** COICOP code assigned when this rule matches. */
-  coicop: CoicopCode;
-  /** Confidence assigned when this rule matches, 0..1. */
-  weight: number;
+  keyword: string;
+  category: CategoryCode;
+  /** Optional note explaining why this rule is justified. */
+  note?: string;
 }
