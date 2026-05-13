@@ -1,11 +1,19 @@
 "use client";
 
-import { useCallback, useReducer } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 import { wizardReducer } from "@/lib/wizard/reducer";
-import { INITIAL_STATE, type ProcessResult } from "@/lib/wizard/types";
+import { shouldLoadSuggestions } from "@/lib/wizard/effects";
+import {
+  INITIAL_STATE,
+  type ProcessResult,
+  type ProcessTransaction,
+} from "@/lib/wizard/types";
+import type { CategoryCode } from "@/lib/cbs/types";
 import { ErrorBanner } from "./ErrorBanner";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { StepBank } from "./StepBank";
+import { StepCorrect } from "./StepCorrect";
+import { StepResult } from "./StepResult";
 import { StepReview } from "./StepReview";
 import { StepUpload } from "./StepUpload";
 
@@ -20,8 +28,66 @@ async function uploadAndProcess(file: File): Promise<ProcessResult> {
   return (await res.json()) as ProcessResult;
 }
 
+interface SuggestResponse {
+  suggestions: Array<{ id: string; suggestedCategory: CategoryCode }>;
+}
+
+async function fetchSuggestions(
+  unknowns: ProcessTransaction[],
+): Promise<Record<string, CategoryCode>> {
+  const res = await fetch("/api/suggest", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      transactions: unknowns.map((t) => ({
+        id: t.id,
+        merchant: t.merchant,
+        description: t.description,
+      })),
+    }),
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(body.error ?? `Suggesties ophalen mislukt (HTTP ${res.status}).`);
+  }
+  const body = (await res.json()) as SuggestResponse;
+  const out: Record<string, CategoryCode> = {};
+  for (const s of body.suggestions) out[s.id] = s.suggestedCategory;
+  return out;
+}
+
+async function postCorrections(
+  entries: Array<{
+    merchant: string | null;
+    description: string;
+    aiSuggested: CategoryCode | null;
+    userChose: CategoryCode;
+  }>,
+): Promise<void> {
+  if (entries.length === 0) return;
+  await fetch("/api/correct", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ corrections: entries }),
+  });
+}
+
+function fallbackSuggestions(unknowns: ProcessTransaction[]): Record<string, CategoryCode> {
+  const out: Record<string, CategoryCode> = {};
+  for (const t of unknowns) out[t.id] = "12";
+  return out;
+}
+
 export function Wizard() {
   const [state, dispatch] = useReducer(wizardReducer, INITIAL_STATE);
+
+  /**
+   * Tracks whether a /api/suggest call is currently pending. Lives in a
+   * ref (not React state) so dispatching LOAD_SUGGESTIONS_START does not
+   * trigger the effect cleanup and silently cancel its own fetch. See
+   * `shouldLoadSuggestions` and the comment on the effect below.
+   */
+  const fetchInFlight = useRef(false);
 
   const handleProcess = useCallback(async () => {
     if (!state.uploadedFile) return;
@@ -36,6 +102,119 @@ export function Wizard() {
     }
   }, [state.uploadedFile]);
 
+  /**
+   * Auto-load AI suggestions when entering the correction step.
+   *
+   * NOTE: `state.suggestionsLoading` is deliberately NOT in the dependency
+   * array. Dispatching `LOAD_SUGGESTIONS_START` flips that flag, which —
+   * if it were a dep — would re-trigger this effect, run its cleanup, and
+   * set `cancelled = true` before the fetch could resolve. The in-flight
+   * guard lives on a useRef so the effect's own dispatch doesn't sabotage
+   * the very fetch it just started. See React 18 strict mode + reducer
+   * dispatch loops.
+   */
+  useEffect(() => {
+    const precondition = {
+      step: state.step,
+      suggestionsLoaded: state.suggestions !== null,
+      fetchInFlight: fetchInFlight.current,
+      hasProcessResult: state.processResult !== null,
+    };
+    if (!shouldLoadSuggestions(precondition)) return;
+    // processResult must exist by the time we get here (the predicate checks it).
+    const result = state.processResult!;
+
+    const unknowns = result.transactions.filter((t) => t.category === null);
+    if (unknowns.length === 0) {
+      dispatch({
+        type: "LOAD_SUGGESTIONS_SUCCESS",
+        suggestions: {},
+        fallback: false,
+      });
+      return;
+    }
+
+    let cancelled = false;
+    fetchInFlight.current = true;
+    dispatch({ type: "LOAD_SUGGESTIONS_START" });
+    fetchSuggestions(unknowns)
+      .then((suggestions) => {
+        fetchInFlight.current = false;
+        if (cancelled) return;
+        dispatch({
+          type: "LOAD_SUGGESTIONS_SUCCESS",
+          suggestions,
+          fallback: false,
+        });
+      })
+      .catch(() => {
+        fetchInFlight.current = false;
+        if (cancelled) return;
+        dispatch({
+          type: "LOAD_SUGGESTIONS_SUCCESS",
+          suggestions: fallbackSuggestions(unknowns),
+          fallback: true,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [state.step, state.suggestions, state.processResult]);
+
+  const handleSubmitCorrections = useCallback(async () => {
+    if (!state.processResult) return;
+    dispatch({ type: "SUBMIT_CORRECTIONS_START" });
+
+    const suggestions = state.suggestions ?? {};
+    const overrideEntries: Array<{
+      merchant: string | null;
+      description: string;
+      aiSuggested: CategoryCode | null;
+      userChose: CategoryCode;
+    }> = [];
+    for (const t of state.processResult.transactions) {
+      if (t.category !== null) continue;
+      const chosen = state.userCategories[t.id];
+      if (!chosen) continue;
+      const suggested = suggestions[t.id];
+      // Log only when the user actually overrode the suggestion.
+      if (chosen !== suggested) {
+        overrideEntries.push({
+          merchant: t.merchant,
+          description: t.description,
+          aiSuggested: state.suggestionsFallback ? null : suggested ?? null,
+          userChose: chosen,
+        });
+      }
+    }
+
+    try {
+      await postCorrections(overrideEntries);
+    } catch {
+      // Logging is best-effort; never block the UX.
+    }
+
+    // Patch the process result so downstream steps see the user's choices.
+    const patched: ProcessResult = {
+      ...state.processResult,
+      transactions: state.processResult.transactions.map((t) => {
+        if (t.category !== null) return t;
+        const chosen = state.userCategories[t.id];
+        if (!chosen) return t;
+        return { ...t, category: chosen, categorySource: "user" as const };
+      }),
+      categorizedCount: state.processResult.transactions.filter(
+        (t) => t.category !== null || state.userCategories[t.id],
+      ).length,
+      unknownCount: state.processResult.transactions.filter(
+        (t) => t.category === null && !state.userCategories[t.id],
+      ).length,
+    };
+
+    dispatch({ type: "SUBMIT_CORRECTIONS_SUCCESS", patched });
+  }, [state.processResult, state.suggestions, state.userCategories, state.suggestionsFallback]);
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
       <ProgressIndicator current={state.step} />
@@ -43,7 +222,7 @@ export function Wizard() {
       {state.error && (
         <ErrorBanner
           message={state.error}
-          onRetry={state.uploadedFile ? handleProcess : undefined}
+          onRetry={state.uploadedFile && state.step === "upload" ? handleProcess : undefined}
           onDismiss={() => dispatch({ type: "DISMISS_ERROR" })}
         />
       )}
@@ -69,11 +248,30 @@ export function Wizard() {
         <StepReview
           result={state.processResult}
           onBack={() => dispatch({ type: "GO_TO_STEP", step: "upload" })}
-          onNext={() =>
-            alert(
-              "De categorisatie-correctie (module 4e-1b) komt in een volgende sessie.",
-            )
+          onNext={() => dispatch({ type: "GO_TO_STEP", step: "correct" })}
+        />
+      )}
+
+      {state.step === "correct" && state.processResult && (
+        <StepCorrect
+          result={state.processResult}
+          suggestionsLoading={state.suggestionsLoading}
+          suggestionsFallback={state.suggestionsFallback}
+          userCategories={state.userCategories}
+          submitting={state.submitting}
+          onChange={(id, category) =>
+            dispatch({ type: "UPDATE_USER_CATEGORY", id, category })
           }
+          onBack={() => dispatch({ type: "GO_TO_STEP", step: "review" })}
+          onSubmit={handleSubmitCorrections}
+        />
+      )}
+
+      {state.step === "result" && state.processResult && (
+        <StepResult
+          result={state.processResult}
+          onBack={() => dispatch({ type: "GO_TO_STEP", step: "correct" })}
+          onReset={() => dispatch({ type: "RESET" })}
         />
       )}
     </div>

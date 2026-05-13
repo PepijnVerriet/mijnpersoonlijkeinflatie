@@ -1,4 +1,16 @@
 {
   "_comment": "Globale AI-categorisatie cache. Genormaliseerde merchant-keys. Bevat GEEN persoonlijke data (geen IBANs, bedragen, data). v1-keuze: in git ingecheckt. Voor productie met meerdere gebruikers vervangen door een gedeelde datastore (database / KV-store).",
-  "entries": {}
+  "entries": {
+    "total nn001189 hambake": "07",
+    "lu89 7510 0013 5104 200e": "unknown",
+    "haan oerlesestraat": "03",
+    "de haan oerlesestraat": "03",
+    "heuvelpoort parkee": "07",
+    "pizzeria & grillroom k": "11",
+    "kreemers tennisschool": "09",
+    "d. smits": "04",
+    "belastingdienst": "unknown",
+    "v.o.f. tigo": "01",
+    "parking emmapassage ti": "07"
+  }
 }

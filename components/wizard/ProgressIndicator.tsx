@@ -3,7 +3,7 @@ import type { WizardStep } from "@/lib/wizard/types";
 interface StepEntry {
   id: WizardStep;
   label: string;
-  /** False for steps that are still placeholders in 4e-1a. */
+  /** When false the step is still under construction; we mark it cursively. */
   available: boolean;
 }
 
@@ -11,8 +11,10 @@ const STEPS: readonly StepEntry[] = [
   { id: "bank", label: "Bank", available: true },
   { id: "upload", label: "Upload", available: true },
   { id: "review", label: "Controleren", available: true },
-  { id: "correct", label: "Corrigeren", available: false },
-  { id: "result", label: "Resultaat", available: false },
+  { id: "correct", label: "Corrigeren", available: true },
+  // `result` is reachable but the inflation visualisation lands in 4e-1c;
+  // we keep the available flag true so the indicator highlights it cleanly.
+  { id: "result", label: "Resultaat", available: true },
 ];
 
 interface ProgressIndicatorProps {

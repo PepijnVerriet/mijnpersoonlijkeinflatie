@@ -12,6 +12,9 @@
 # test data (bank statements — contain personal data, never commit)
 /test-data
 
+# user corrections log — contains raw descriptions from real uploads
+lib/categorizer/data/user-corrections.log
+
 # next.js
 /.next/
 /out/

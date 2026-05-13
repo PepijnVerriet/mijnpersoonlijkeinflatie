@@ -1,8 +1,10 @@
+import type { CategoryCode } from "@/lib/cbs/types";
 import type {
   AiCategorizationItem,
   AiCategorizationResponse,
   AiCategoryResult,
   AiProvider,
+  AiSuggestionResponse,
 } from "./types";
 
 /**
@@ -25,6 +27,9 @@ function classify(item: AiCategorizationItem): AiCategoryResult {
   return "unknown";
 }
 
+/** Fallback when the mock cannot produce a confident category. */
+const SUGGESTION_FALLBACK: CategoryCode = "12";
+
 export const mockAiProvider: AiProvider = {
   async categorizeBatch(
     items: AiCategorizationItem[],
@@ -33,5 +38,18 @@ export const mockAiProvider: AiProvider = {
       transactionId: item.transactionId,
       category: classify(item),
     }));
+  },
+
+  async suggestBatch(items: AiCategorizationItem[]): Promise<AiSuggestionResponse[]> {
+    // The mock has no real reasoning power; whatever the standard pass returns,
+    // we replace `"unknown"` with the safe fallback so the UI always shows a
+    // concrete default the user can adjust.
+    return items.map((item) => {
+      const verdict = classify(item);
+      return {
+        transactionId: item.transactionId,
+        category: verdict === "unknown" ? SUGGESTION_FALLBACK : verdict,
+      };
+    });
   },
 };

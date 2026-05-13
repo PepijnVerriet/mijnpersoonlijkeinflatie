@@ -38,6 +38,28 @@ export interface WizardState {
   loading: boolean;
   /** Last user-facing error, or `null` when none. */
   error: string | null;
+
+  // -- Correction step (module 4e-1b) state ----------------------------------
+  /** True while `/api/suggest` is in flight. */
+  suggestionsLoading: boolean;
+  /**
+   * AI's initial best-guess per transaction id (only for `category===null`
+   * transactions, so the dropdown can pre-select them). `null` until the
+   * call has resolved.
+   */
+  suggestions: Record<string, CategoryCode> | null;
+  /**
+   * The category currently shown in each correction dropdown — starts as a
+   * copy of `suggestions` and is mutated as the user picks alternatives.
+   */
+  userCategories: Record<string, CategoryCode>;
+  /**
+   * True if the suggest call failed and we fell back to default '12' for
+   * every dropdown. The UI shows a banner so the user knows AI is offline.
+   */
+  suggestionsFallback: boolean;
+  /** True while `/api/correct` is in flight. */
+  submitting: boolean;
 }
 
 /** Actions accepted by the reducer (see `lib/wizard/reducer.ts`). */
@@ -50,6 +72,22 @@ export type WizardAction =
   | { type: "PROCESS_ERROR"; message: string }
   | { type: "DISMISS_ERROR" }
   | { type: "GO_TO_STEP"; step: WizardStep }
+  | { type: "LOAD_SUGGESTIONS_START" }
+  | {
+      type: "LOAD_SUGGESTIONS_SUCCESS";
+      suggestions: Record<string, CategoryCode>;
+      /** True when this came from the fallback path (AI was unavailable). */
+      fallback: boolean;
+    }
+  | { type: "LOAD_SUGGESTIONS_ERROR"; message: string }
+  | { type: "UPDATE_USER_CATEGORY"; id: string; category: CategoryCode }
+  | { type: "SUBMIT_CORRECTIONS_START" }
+  | {
+      type: "SUBMIT_CORRECTIONS_SUCCESS";
+      /** Process result with category/categorySource updated from userCategories. */
+      patched: ProcessResult;
+    }
+  | { type: "SUBMIT_CORRECTIONS_ERROR"; message: string }
   | { type: "RESET" };
 
 /** Initial state of a brand-new wizard session. */
@@ -60,4 +98,9 @@ export const INITIAL_STATE: WizardState = {
   processResult: null,
   loading: false,
   error: null,
+  suggestionsLoading: false,
+  suggestions: null,
+  userCategories: {},
+  suggestionsFallback: false,
+  submitting: false,
 };

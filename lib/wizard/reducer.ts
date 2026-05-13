@@ -33,6 +33,10 @@ export function wizardReducer(
         error: null,
         processResult: action.result,
         step: "review",
+        // Reset any stale correction-step state if the user re-uploads.
+        suggestions: null,
+        userCategories: {},
+        suggestionsFallback: false,
       };
 
     case "PROCESS_ERROR":
@@ -43,6 +47,55 @@ export function wizardReducer(
 
     case "GO_TO_STEP":
       return { ...state, step: action.step, error: null };
+
+    case "LOAD_SUGGESTIONS_START":
+      return {
+        ...state,
+        suggestionsLoading: true,
+        suggestionsFallback: false,
+        error: null,
+      };
+
+    case "LOAD_SUGGESTIONS_SUCCESS":
+      return {
+        ...state,
+        suggestionsLoading: false,
+        suggestions: action.suggestions,
+        userCategories: { ...action.suggestions },
+        suggestionsFallback: action.fallback,
+      };
+
+    case "LOAD_SUGGESTIONS_ERROR":
+      return {
+        ...state,
+        suggestionsLoading: false,
+        error: action.message,
+        suggestionsFallback: true,
+      };
+
+    case "UPDATE_USER_CATEGORY":
+      return {
+        ...state,
+        userCategories: {
+          ...state.userCategories,
+          [action.id]: action.category,
+        },
+      };
+
+    case "SUBMIT_CORRECTIONS_START":
+      return { ...state, submitting: true, error: null };
+
+    case "SUBMIT_CORRECTIONS_SUCCESS":
+      return {
+        ...state,
+        submitting: false,
+        error: null,
+        processResult: action.patched,
+        step: "result",
+      };
+
+    case "SUBMIT_CORRECTIONS_ERROR":
+      return { ...state, submitting: false, error: action.message };
 
     case "RESET":
       return { ...INITIAL_STATE };

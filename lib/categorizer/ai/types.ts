@@ -26,8 +26,28 @@ export interface AiCategorizationResponse {
   category: AiCategoryResult;
 }
 
+/**
+ * Response when explicitly asking the AI for a *best-guess* category
+ * (`suggestBatch`). By contract this never returns `"unknown"` — callers
+ * use this surface when they want a concrete suggestion to show the user.
+ */
+export interface AiSuggestionResponse {
+  transactionId: string;
+  category: CategoryCode;
+}
+
 /** Pluggable AI categorisation provider. */
 export interface AiProvider {
   /** Categorise a batch of at most 10 transactions (CLAUDE.md principle 11). */
   categorizeBatch(items: AiCategorizationItem[]): Promise<AiCategorizationResponse[]>;
+
+  /**
+   * Optional: produce best-guess categories for items the keyword + standard
+   * AI layers couldn't decide on. Used by the correction screen (module
+   * 4e-1b). Implementations MUST NOT return `"unknown"` here — the contract
+   * with the UI is that every returned item has a concrete `CategoryCode`,
+   * so the user dropdown always has a sensible default. Top-level callers
+   * fall back to `"12"` when a provider omits this method.
+   */
+  suggestBatch?(items: AiCategorizationItem[]): Promise<AiSuggestionResponse[]>;
 }
