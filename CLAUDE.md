@@ -76,6 +76,19 @@ Modulair opgebouwd in losse, onafhankelijke modules:
 12. AI-resultaten worden globaal gecached op genormaliseerde 
     merchant-naam (niet per gebruiker, niet inclusief bedragen of 
     persoonlijke data). Cache-bestand: lib/categorizer/data/ai-cache.json.
+13. Inflatieberekening: ongematchte/unknown transacties worden genegeerd 
+    (niet meegerekend, niet proportioneel verdeeld). UI toont transparant 
+    welk percentage van uitgaven is meegenomen.
+
+14. Bij meerdere maanden uploads: CBS-jaarmutatie wordt per categorie 
+    gewogen gemiddeld op basis van uitgaven in die categorie per maand. 
+    Dus een dure restaurantmaand laat het CBS-cijfer voor categorie 11 
+    zwaarder doortikken dan een goedkope restaurantmaand.
+
+15. Module 4d geeft een rijke return-structuur met totaalcijfer, 
+    breakdown per categorie, en gewichten. UI (4e) bepaalt welk deel 
+    getoond wordt aan welke gebruiker. Toekomstige paywall niet in 
+    berekening, alleen in UI-laag.
 
 
 \## Werkstroom
@@ -101,7 +114,7 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4b: CBS-koppeling → AF met mock-laag, gecommit
 - Module 4c-1: Categorizer keyword-engine → AF (78% coverage), gecommit
 - Module 4c-2: Categorizer AI-fallback → AF, 93,9% coverage live, gecommit
-- Module 4d: Inflatieberekening → NOG NIET
+- Module 4d: Inflatieberekening → BEZIG
 - Module 4e: UI → NOG NIET
 
 ## Open punten voor volgende sessie
