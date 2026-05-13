@@ -46,13 +46,14 @@ function topUnmatched(results: CategorizationResult[], n: number): Array<{ key: 
     .map(([key, v]) => ({ key, count: v.count, example: v.example }));
 }
 
-describe("keyword categorizer (integration, test-data/rabobank-2025-04.pdf)", () => {
+describe("categorizer (integration, test-data/rabobank-2025-04.pdf)", () => {
   let transactions: Transaction[];
   let results: CategorizationResult[];
 
   beforeAll(async () => {
     transactions = await parseRabobankPdf(pdfBuffer);
-    results = categorizeTransactions(transactions);
+    // Default options: mock AI fallback + in-memory cache (no network).
+    results = await categorizeTransactions(transactions);
   });
 
   it("returns one result per transaction, in order", () => {
@@ -62,7 +63,7 @@ describe("keyword categorizer (integration, test-data/rabobank-2025-04.pdf)", ()
     }
   });
 
-  it("classifies at least 70% of transactions (keyword coverage)", () => {
+  it("classifies at least 77% of transactions (keyword + mock AI)", () => {
     const matched = results.filter((r) => r.category !== null).length;
     const coverage = matched / results.length;
 
@@ -73,7 +74,7 @@ describe("keyword categorizer (integration, test-data/rabobank-2025-04.pdf)", ()
         `(${matched}/${results.length})\n`,
     );
 
-    if (coverage < 0.7) {
+    if (coverage < 0.77) {
       const top = topUnmatched(results, 10);
       // eslint-disable-next-line no-console
       console.log(
@@ -83,7 +84,7 @@ describe("keyword categorizer (integration, test-data/rabobank-2025-04.pdf)", ()
       );
     }
 
-    expect(coverage).toBeGreaterThanOrEqual(0.7);
+    expect(coverage).toBeGreaterThanOrEqual(0.77);
   });
 
   it("has at least two of {01, 07, 11} in the top-3 categories", () => {

@@ -12,6 +12,7 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.95.2",
     "next": "14.2.35",
     "pdfjs-dist": "^5.7.284",
     "react": "^18",

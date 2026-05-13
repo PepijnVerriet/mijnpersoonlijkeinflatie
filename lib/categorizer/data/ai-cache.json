@@ -1,0 +1,4 @@
+{
+  "_comment": "Globale AI-categorisatie cache. Genormaliseerde merchant-keys. Bevat GEEN persoonlijke data (geen IBANs, bedragen, data). v1-keuze: in git ingecheckt. Voor productie met meerdere gebruikers vervangen door een gedeelde datastore (database / KV-store).",
+  "entries": {}
+}
