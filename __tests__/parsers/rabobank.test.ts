@@ -333,10 +333,41 @@ describe("isConsumerExpense", () => {
     expect(isConsumerExpense(tx, "P.G. Verriet")).toBe(false);
     expect(isOwnAccountTransfer(tx, "P.G. Verriet")).toBe(true);
   });
-  it("drops transfers to an account in the user's own name", () => {
+  it("drops tb transfers to an account in the user's own name", () => {
     expect(
-      isConsumerExpense(makeTx({ counterpartyName: "P. G. Verriet" }), "P.G. Verriet"),
+      isConsumerExpense(
+        makeTx({ code: "tb", counterpartyName: "P. G. Verriet" }),
+        "P.G. Verriet",
+      ),
     ).toBe(false);
+  });
+  it("drops tb 'Schotland' savings-pot transfers to the user's own account", () => {
+    const tx = makeTx({
+      code: "tb",
+      counterpartyName: "P.G. Verriet",
+      description: "NL08 RABO 3162 5742 34 P.G. Verriet Schotland",
+    });
+    expect(isConsumerExpense(tx, "P.G. Verriet")).toBe(false);
+    expect(isOwnAccountTransfer(tx, "P.G. Verriet")).toBe(true);
+  });
+  it("drops tb 'Vrij Spaargeld' transfers to the user's own account", () => {
+    const tx = makeTx({
+      code: "tb",
+      counterpartyName: "Verriet, P.G.",
+      description: "NL08 RABO 3162 5742 34 Vrij Spaargeld",
+    });
+    expect(isConsumerExpense(tx, "P.G. Verriet")).toBe(false);
+    expect(isOwnAccountTransfer(tx, "P.G. Verriet")).toBe(true);
+  });
+  it("KEEPS a non-tb payment to a person with the same name (no false positive)", () => {
+    // Card payment (code 'bc') to a friend whose name happens to match the
+    // account holder — must not be mistaken for an internal transfer.
+    expect(
+      isConsumerExpense(
+        makeTx({ code: "bc", counterpartyName: "P.G. Verriet" }),
+        "P.G. Verriet",
+      ),
+    ).toBe(true);
   });
   it("drops brokerage cash orders (Flatex / CASHORDER)", () => {
     expect(
@@ -353,5 +384,25 @@ describe("namesMatch", () => {
     expect(namesMatch("P.G. Verriet", "P. G. Verriet")).toBe(true);
     expect(namesMatch("KPN B.V.", "P.G. Verriet")).toBe(false);
     expect(namesMatch(null, "X")).toBe(false);
+  });
+
+  it("matches with tokens in any order ('Verriet, P.G.' ↔ 'P.G. Verriet')", () => {
+    expect(namesMatch("P.G. Verriet", "Verriet, P.G.")).toBe(true);
+    expect(namesMatch("Verriet, P.G.", "P G Verriet")).toBe(true);
+  });
+
+  it("does not match when token sets differ in size", () => {
+    expect(namesMatch("P.G. Verriet", "Verriet")).toBe(false);
+    expect(namesMatch("Verriet", "P.G. Verriet")).toBe(false);
+  });
+
+  it("does not match different surnames sharing a first initial", () => {
+    expect(namesMatch("Pepijn Verriet", "Pepijn Jansen")).toBe(false);
+  });
+
+  it("returns false for empty or null inputs", () => {
+    expect(namesMatch("", "P.G. Verriet")).toBe(false);
+    expect(namesMatch("P.G. Verriet", "")).toBe(false);
+    expect(namesMatch(null, null)).toBe(false);
   });
 });
