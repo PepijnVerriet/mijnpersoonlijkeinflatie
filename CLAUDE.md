@@ -83,7 +83,7 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 ## Huidige status
 
 - Module 4a: Rabobank PDF parser → AF, 33 tests groen, gecommit
-- Module 4b: CBS-koppeling → BEZIG, mock-laag vanwege CBS-storing
+- Module 4b: CBS-koppeling → AF met mock-laag, vervangen door echte CBS-API in latere fase
 - Module 4c: Categorizer → NOG NIET
 - Module 4d: Inflatieberekening → NOG NIET
 - Module 4e: UI → NOG NIET
