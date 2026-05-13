@@ -68,7 +68,14 @@ Modulair opgebouwd in losse, onafhankelijke modules:
 10. Anthropic API-keys staan alleen in environment variables 
     (.env.local, Vercel env vars), nooit in code of git. AI-calls 
     gebeuren server-side via Next.js backend routes.
+11. AI-fallback (Claude Haiku) wordt aangeroepen in batches van 10 
+    transacties. AI antwoordt per transactie met een categorie OF 
+    'unknown'. Geen numerieke confidence scores. Unknown betekent: 
+    gebruiker krijgt later in de UI een vraag om handmatig te kiezen.
 
+12. AI-resultaten worden globaal gecached op genormaliseerde 
+    merchant-naam (niet per gebruiker, niet inclusief bedragen of 
+    persoonlijke data). Cache-bestand: lib/categorizer/data/ai-cache.json.
 
 
 \## Werkstroom
