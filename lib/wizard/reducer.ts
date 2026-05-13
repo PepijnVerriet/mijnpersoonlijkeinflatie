@@ -92,10 +92,30 @@ export function wizardReducer(
         error: null,
         processResult: action.patched,
         step: "result",
+        // Reset result-step state so the auto-calculate effect re-runs
+        // when the user goes back to corrections and re-submits.
+        inflationCalculation: null,
+        inflationMeta: null,
+        calculating: false,
       };
 
     case "SUBMIT_CORRECTIONS_ERROR":
       return { ...state, submitting: false, error: action.message };
+
+    case "CALCULATE_INFLATION_START":
+      return { ...state, calculating: true, error: null };
+
+    case "CALCULATE_INFLATION_SUCCESS":
+      return {
+        ...state,
+        calculating: false,
+        error: null,
+        inflationCalculation: action.calculation,
+        inflationMeta: action.meta,
+      };
+
+    case "CALCULATE_INFLATION_ERROR":
+      return { ...state, calculating: false, error: action.message };
 
     case "RESET":
       return { ...INITIAL_STATE };

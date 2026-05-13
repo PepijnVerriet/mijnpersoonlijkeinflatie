@@ -2,13 +2,18 @@
 
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { wizardReducer } from "@/lib/wizard/reducer";
-import { shouldLoadSuggestions } from "@/lib/wizard/effects";
+import {
+  shouldCalculateInflation,
+  shouldLoadSuggestions,
+} from "@/lib/wizard/effects";
 import {
   INITIAL_STATE,
+  type InflationMeta,
   type ProcessResult,
   type ProcessTransaction,
 } from "@/lib/wizard/types";
 import type { CategoryCode } from "@/lib/cbs/types";
+import type { InflationCalculation } from "@/lib/inflation/types";
 import { ErrorBanner } from "./ErrorBanner";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { StepBank } from "./StepBank";
@@ -72,6 +77,35 @@ async function postCorrections(
   });
 }
 
+interface CalculateResponseBody {
+  calculation: InflationCalculation;
+  meta: InflationMeta;
+}
+
+async function calculateInflation(
+  result: ProcessResult,
+): Promise<CalculateResponseBody> {
+  const res = await fetch("/api/calculate", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      transactions: result.transactions.map((t) => ({
+        id: t.id,
+        date: t.date,
+        amount: t.amount,
+        merchant: t.merchant,
+        description: t.description,
+        category: t.category,
+      })),
+    }),
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(body.error ?? `Berekening mislukt (HTTP ${res.status}).`);
+  }
+  return (await res.json()) as CalculateResponseBody;
+}
+
 function fallbackSuggestions(unknowns: ProcessTransaction[]): Record<string, CategoryCode> {
   const out: Record<string, CategoryCode> = {};
   for (const t of unknowns) out[t.id] = "12";
@@ -88,6 +122,8 @@ export function Wizard() {
    * `shouldLoadSuggestions` and the comment on the effect below.
    */
   const fetchInFlight = useRef(false);
+  /** Same trick for the /api/calculate effect. */
+  const calculateInFlight = useRef(false);
 
   const handleProcess = useCallback(async () => {
     if (!state.uploadedFile) return;
@@ -161,6 +197,48 @@ export function Wizard() {
       cancelled = true;
     };
   }, [state.step, state.suggestions, state.processResult]);
+
+  /**
+   * Auto-run the inflation calculation when entering the result step.
+   * Same ref-based guard as the suggestions effect to avoid self-cancellation.
+   */
+  useEffect(() => {
+    const precondition = {
+      step: state.step,
+      calculationLoaded: state.inflationCalculation !== null,
+      fetchInFlight: calculateInFlight.current,
+      hasProcessResult: state.processResult !== null,
+    };
+    if (!shouldCalculateInflation(precondition)) return;
+    const result = state.processResult!;
+
+    let cancelled = false;
+    calculateInFlight.current = true;
+    dispatch({ type: "CALCULATE_INFLATION_START" });
+    calculateInflation(result)
+      .then(({ calculation, meta }) => {
+        calculateInFlight.current = false;
+        if (cancelled) return;
+        dispatch({
+          type: "CALCULATE_INFLATION_SUCCESS",
+          calculation,
+          meta,
+        });
+      })
+      .catch((err) => {
+        calculateInFlight.current = false;
+        if (cancelled) return;
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Onbekende fout bij berekening.";
+        dispatch({ type: "CALCULATE_INFLATION_ERROR", message });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [state.step, state.inflationCalculation, state.processResult]);
 
   const handleSubmitCorrections = useCallback(async () => {
     if (!state.processResult) return;
@@ -270,6 +348,9 @@ export function Wizard() {
       {state.step === "result" && state.processResult && (
         <StepResult
           result={state.processResult}
+          calculation={state.inflationCalculation}
+          meta={state.inflationMeta}
+          calculating={state.calculating}
           onBack={() => dispatch({ type: "GO_TO_STEP", step: "correct" })}
           onReset={() => dispatch({ type: "RESET" })}
         />

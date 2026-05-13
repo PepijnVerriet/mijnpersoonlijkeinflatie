@@ -32,3 +32,26 @@ export function shouldLoadSuggestions(pre: SuggestPrecondition): boolean {
   if (!pre.hasProcessResult) return false;
   return true;
 }
+
+/**
+ * Same shape, different effect: gate the auto-calculate POST when entering
+ * the result step. Uses a ref-backed `fetchInFlight` for the exact same
+ * reason as the suggestion effect.
+ */
+export interface CalculatePrecondition {
+  step: WizardStep;
+  /** True when `state.inflationCalculation !== null`. */
+  calculationLoaded: boolean;
+  fetchInFlight: boolean;
+  hasProcessResult: boolean;
+}
+
+export function shouldCalculateInflation(
+  pre: CalculatePrecondition,
+): boolean {
+  if (pre.step !== "result") return false;
+  if (pre.calculationLoaded) return false;
+  if (pre.fetchInFlight) return false;
+  if (!pre.hasProcessResult) return false;
+  return true;
+}

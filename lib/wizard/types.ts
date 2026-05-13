@@ -1,5 +1,12 @@
 import type { CategoryCode } from "@/lib/cbs/types";
+import type { InflationCalculation } from "@/lib/inflation/types";
 import type { BankId } from "@/lib/types";
+
+/** Server-side metadata attached to every /api/calculate response. */
+export interface InflationMeta {
+  usingMockData: boolean;
+  calculatedAt: string;
+}
 
 /** Steps in the upload-and-review wizard. */
 export type WizardStep = "bank" | "upload" | "review" | "correct" | "result";
@@ -60,6 +67,14 @@ export interface WizardState {
   suggestionsFallback: boolean;
   /** True while `/api/correct` is in flight. */
   submitting: boolean;
+
+  // -- Result step (module 4e-1c) state --------------------------------------
+  /** True while `/api/calculate` is in flight. */
+  calculating: boolean;
+  /** Result of the most recent inflation calculation. */
+  inflationCalculation: InflationCalculation | null;
+  /** Metadata around the inflation calculation (mock-data flag, timestamp). */
+  inflationMeta: InflationMeta | null;
 }
 
 /** Actions accepted by the reducer (see `lib/wizard/reducer.ts`). */
@@ -88,6 +103,13 @@ export type WizardAction =
       patched: ProcessResult;
     }
   | { type: "SUBMIT_CORRECTIONS_ERROR"; message: string }
+  | { type: "CALCULATE_INFLATION_START" }
+  | {
+      type: "CALCULATE_INFLATION_SUCCESS";
+      calculation: InflationCalculation;
+      meta: InflationMeta;
+    }
+  | { type: "CALCULATE_INFLATION_ERROR"; message: string }
   | { type: "RESET" };
 
 /** Initial state of a brand-new wizard session. */
@@ -103,4 +125,7 @@ export const INITIAL_STATE: WizardState = {
   userCategories: {},
   suggestionsFallback: false,
   submitting: false,
+  calculating: false,
+  inflationCalculation: null,
+  inflationMeta: null,
 };
