@@ -92,7 +92,7 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 
 - Module 4a: Rabobank PDF parser → AF, 33 tests groen, gecommit
 - Module 4b: CBS-koppeling → AF met mock-laag, gecommit
-- Module 4c-1: Categorizer keyword-engine → BEZIG
+- Module 4c-1: Categorizer keyword-engine → AF (78% coverage), gecommit
 - Module 4c-2: Categorizer AI-fallback → NOG NIET
 - Module 4d: Inflatieberekening → NOG NIET
 - Module 4e: UI → NOG NIET
@@ -105,5 +105,24 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
   de description in plaats van de merchant.
 - Voor module 4c: merchant-normalisatie van ec-rijen (Uber, etc) is nu 
   best-effort. Verbeteren als categorisatie hierop misgaat.
+- 4c-2: Bouman (6x in testdata) is een persoon aan wie via Tikkie 
+  meerdere uitgaven werden betaald. AI moet de description achter de 
+  naam gebruiken (bijv. "Bouman: Cafetaria Marktzicht" → 11).
+- 4c-2: PayPal-betalingen via Luxemburgse IBAN bevatten geen merchant. 
+  AI heeft hier mogelijk te weinig context en de gebruiker moet dit 
+  handmatig kunnen opvolgen.
+- 4c-2: Afkortingen met punten ("Biblioth.M.Brabant") moeten AI 
+  herkennen als bibliotheek.
+- 4c-2: Total tankstation met store-ID-tussenvoeging ("Total Nn001189 
+  Hambake") matcht keyword niet door dat ID. AI moet herkennen dat dit 
+  een tankstation is.
 - CBS API endpoint: https://opendata.cbs.nl/ODataApi/OData/83131NED 
   (basis 2015=100). Storing tijdens setup, controleren bij start 4b.
+
+## Lessen uit ontwikkeling
+
+- Keyword-entries in groep 1 (Pepijn's data) moeten gevalideerd worden 
+  op werkelijke transactie-context (postcode, merchant-format), niet 
+  alleen op naamherkenning. Voorbeeld: "Total Hambake" leek aanvankelijk 
+  een horecagelegenheid, bleek een TotalEnergies-tankstation op een 
+  bedrijventerrein.
