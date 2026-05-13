@@ -15,6 +15,10 @@
 # user corrections log — contains raw descriptions from real uploads
 lib/categorizer/data/user-corrections.log
 
+# AI categorisation cache — keys are normalised merchant strings derived
+# from real uploads. Per-user / per-deploy artefact, not source-of-truth.
+lib/categorizer/data/ai-cache.json
+
 # next.js
 /.next/
 /out/
