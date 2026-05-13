@@ -43,6 +43,7 @@ export const KEYWORDS: readonly KeywordRule[] = [
   { keyword: "uber", category: "07" },
   { keyword: "carwash", category: "07" },
   { keyword: "ns zaltbommel", category: "07" },
+  { keyword: "total hambake", category: "07", note: "TotalEnergies tankstation, Hambakenwetering Den Bosch" },
 
   // 11 Restaurants en hotels
   { keyword: "mcdonalds", category: "11" },
@@ -56,7 +57,6 @@ export const KEYWORDS: readonly KeywordRule[] = [
   { keyword: "pizzeria grillroom", category: "11" },
   { keyword: "dominos", category: "11" },
   { keyword: "cirfood", category: "11", note: "Bedrijfscatering" },
-  { keyword: "total hambake", category: "11", note: "Tilburg uitgaansgelegenheid" },
   { keyword: "studio exploitatie", category: "11" },
   { keyword: "re issue", category: "11" },
   { keyword: "de nacht", category: "11", note: "Tilburg uitgaansgelegenheid" },

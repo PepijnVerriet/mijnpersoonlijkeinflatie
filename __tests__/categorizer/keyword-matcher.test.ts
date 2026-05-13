@@ -118,4 +118,10 @@ describe("matchKeyword — word boundaries and diacritics", () => {
     const r = matchKeyword(tx({ description: "AH TO GO UTRECHT CS" }), KEYWORDS);
     expect(r.matchedKeyword).toBe("ah to go");
   });
+
+  it("treats a hyphen as a space ('NS-Zaltbommel' matches 'ns zaltbommel')", () => {
+    const r = matchKeyword(tx({ description: "NS-Zaltbommel  Zaltbommel" }), KEYWORDS);
+    expect(r.category).toBe("07");
+    expect(r.matchedKeyword).toBe("ns zaltbommel");
+  });
 });

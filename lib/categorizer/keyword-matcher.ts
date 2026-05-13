@@ -15,8 +15,18 @@ function escapeRegex(s: string): string {
  */
 const DIACRITICS_RE = /[̀-ͯ]/g;
 
+/**
+ * Lower-case + strip combining diacritics + map hyphens to spaces so e.g.
+ * "NS-Zaltbommel" and "ns zaltbommel" collapse to the same form. The
+ * resulting whitespace is run-collapsed to a single space.
+ */
 export function normalizeText(s: string): string {
-  return s.normalize("NFD").replace(DIACRITICS_RE, "").toLowerCase();
+  return s
+    .normalize("NFD")
+    .replace(DIACRITICS_RE, "")
+    .replace(/-/g, " ")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
 }
 
 /**
