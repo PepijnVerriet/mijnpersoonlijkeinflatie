@@ -102,6 +102,19 @@ Modulair opgebouwd in losse, onafhankelijke modules:
 
 19. UI moet zowel count-based (uncategorizedRatio) als euro-based 
     (uncategorizedSpendingPct) transparantie tonen aan de gebruiker.
+20. Categorisatie-correctie (4e-1b) gebruikt hybride aanpak: 
+    AI doet eerst een suggestie voor unknowns (best-guess, ook als 
+    deze normaal 'unknown' zou retourneren), gebruiker bevestigt of 
+    overschrijft via dropdown per transactie. Geen één-voor-één flow.
+
+21. Gebruikerscorrecties worden gelogd naar een aparte file 
+    (data/user-corrections.log of equivalent), niet teruggevoerd in 
+    de globale AI-cache. Bedoeld voor periodieke handmatige review 
+    om keywords.ts uit te breiden. Voorkomt vervuiling tussen gebruikers.
+
+22. Doorgaan zonder alles te corrigeren is toegestaan met gentle nudge: 
+    'Je hebt X transacties open, die staan voor Y% van je uitgaven 
+    in euro's. Wil je toch doorgaan?'. Niet blokkerend.
 
 
 \## Werkstroom
@@ -129,7 +142,7 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4c-2: Categorizer AI-fallback → AF, 93,9% coverage live, gecommit
 - Module 4d: Inflatieberekening → AF, gecommit
 - Module 4e-1a: Wizard + bank + upload + review → AF, gecommit
-- Module 4e-1b: Categorisatie-correctie → NOG NIET
+- Module 4e-1b: Categorisatie-correctie → BEZIG
 - Module 4e-1c: Resultaat-scherm → NOG NIET
 - Module 4e-2: Visuele afwerking, content, copywriting → NOG NIET
 
