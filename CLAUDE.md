@@ -114,7 +114,7 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4b: CBS-koppeling → AF met mock-laag, gecommit
 - Module 4c-1: Categorizer keyword-engine → AF (78% coverage), gecommit
 - Module 4c-2: Categorizer AI-fallback → AF, 93,9% coverage live, gecommit
-- Module 4d: Inflatieberekening → BEZIG
+- Module 4d: Inflatieberekening → AF, gecommit
 - Module 4e: UI → NOG NIET
 
 ## Open punten voor volgende sessie
@@ -136,6 +136,13 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - 4c-2: Total tankstation met store-ID-tussenvoeging ("Total Nn001189 
   Hambake") matcht keyword niet door dat ID. AI moet herkennen dat dit 
   een tankstation is.
+- 4e: UI moet zowel count-based (uncategorizedRatio) als euro-based 
+  (uncategorizedSpendingPct) transparantie tonen, want die kunnen 27 
+  procentpunt uit elkaar liggen op echte data (testdata april 2025: 
+  20% transacties vs 47% euro's ongecategoriseerd).
+- 4e: UI moet adviseren live AI te gebruiken in productie, want mock 
+  AI laat dure transacties als huur door (D. Smits €617 in testdata 
+  blijft 'unknown' met mock, live AI gokt redelijk op categorie 04).
 - CBS API endpoint: https://opendata.cbs.nl/ODataApi/OData/83131NED 
   (basis 2015=100). Storing tijdens setup, controleren bij start 4b.
 
