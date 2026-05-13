@@ -55,6 +55,11 @@ Modulair opgebouwd in losse, onafhankelijke modules:
    transacties samen. De UI moedigt twaalf maanden aan voor een 
    nauwkeurig persoonlijk mandje, maar één maand is ook toegestaan met 
    een waarschuwing over grovere schatting.
+7\. CBS-data wordt opgehaald via een Next.js backend route 
+   (app/api/cbs/route.ts), nooit direct vanuit de browser. Dit maakt 
+   caching mogelijk en biedt fallback bij CBS-storingen.
+8\. Inflatieberekening gebruikt per uploadmaand de jaarmutatie van 
+   diezelfde maand (jan 2025 vergeleken met jan 2024, niet met huidige).
 
 
 
@@ -78,7 +83,7 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 ## Huidige status
 
 - Module 4a: Rabobank PDF parser → AF, 33 tests groen, gecommit
-- Module 4b: CBS-koppeling → NOG NIET,
+- Module 4b: CBS-koppeling → BEZIG, mock-laag vanwege CBS-storing
 - Module 4c: Categorizer → NOG NIET
 - Module 4d: Inflatieberekening → NOG NIET
 - Module 4e: UI → NOG NIET
