@@ -60,6 +60,14 @@ Modulair opgebouwd in losse, onafhankelijke modules:
    caching mogelijk en biedt fallback bij CBS-storingen.
 8\. Inflatieberekening gebruikt per uploadmaand de jaarmutatie van 
    diezelfde maand (jan 2025 vergeleken met jan 2024, niet met huidige).
+9. Categorisatie werkt in twee lagen: eerst keyword-matching (hoog 
+   vertrouwen, snel, gratis), daarna AI-fallback alleen voor transacties 
+   waar geen enkele keyword matcht. Doel: 80-90% keyword-coverage op 
+   echte Nederlandse data.
+
+10. Anthropic API-keys staan alleen in environment variables 
+    (.env.local, Vercel env vars), nooit in code of git. AI-calls 
+    gebeuren server-side via Next.js backend routes.
 
 
 
@@ -83,8 +91,9 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 ## Huidige status
 
 - Module 4a: Rabobank PDF parser → AF, 33 tests groen, gecommit
-- Module 4b: CBS-koppeling → AF met mock-laag, vervangen door echte CBS-API in latere fase
-- Module 4c: Categorizer → NOG NIET
+- Module 4b: CBS-koppeling → AF met mock-laag, gecommit
+- Module 4c-1: Categorizer keyword-engine → BEZIG
+- Module 4c-2: Categorizer AI-fallback → NOG NIET
 - Module 4d: Inflatieberekening → NOG NIET
 - Module 4e: UI → NOG NIET
 
