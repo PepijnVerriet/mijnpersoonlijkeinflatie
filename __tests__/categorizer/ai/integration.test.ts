@@ -53,11 +53,13 @@ describe("categorizer + mock AI (integration, test-data/rabobank-2025-04.pdf)", 
     }
   });
 
-  it("classifies Biblioth.M.Brabant as category 09 via AI", () => {
+  it("classifies Biblioth.M.Brabant as category 09 (via the 'biblioth' keyword)", () => {
     const biblio = results.find((r) => /biblioth/i.test(describeTx(r.transaction)));
     expect(biblio, "Biblioth transaction should exist in test data").toBeDefined();
     expect(biblio!.category).toBe("09");
-    expect(biblio!.source).toBe("ai");
+    // The dedicated 'biblioth' keyword (added after live-AI feedback) prevents
+    // this row from ever reaching the AI fallback.
+    expect(biblio!.source).toBe("keyword");
   });
 
   it("never assigns 'ai' source to a transaction that already matched a keyword", () => {

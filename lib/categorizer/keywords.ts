@@ -73,6 +73,8 @@ export const KEYWORDS: readonly KeywordRule[] = [
   // 06 Gezondheid
   { keyword: "vgz", category: "06" },
   { keyword: "kruidvat", category: "06", note: "Drogist; in Pepijn-data overwegend gezondheid" },
+  { keyword: "stichting elisabet", category: "06", note: "Sint Elisabeth Ziekenhuis Tilburg, ziekenhuiszorg" },
+  { keyword: "elisabethziekenhuis", category: "06", note: "Variant schrijfwijze ziekenhuis" },
 
   // 09 Recreatie en cultuur
   { keyword: "netflix", category: "09" },
@@ -85,7 +87,6 @@ export const KEYWORDS: readonly KeywordRule[] = [
   { keyword: "skillsource", category: "10" },
 
   // 12 Diverse goederen en diensten
-  { keyword: "stichting elisabeth", category: "12" },
   { keyword: "frans hommersom", category: "12", note: "Kapper" },
 
   // ===========================================================================
@@ -131,6 +132,7 @@ export const KEYWORDS: readonly KeywordRule[] = [
   // 09 Recreatie en cultuur (electronica = AV/IT-apparatuur valt onder 09)
   { keyword: "mediamarkt", category: "09" },
   { keyword: "coolblue", category: "09" },
+  { keyword: "biblioth", category: "09", note: "Openbare bibliotheek (COICOP recreatie/cultuur). Matcht ook afkortingen Biblioth.M.Brabant" },
 
   // 12 Diverse goederen en diensten
   { keyword: "hema", category: "12" },
