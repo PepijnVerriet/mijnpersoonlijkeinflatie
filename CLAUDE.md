@@ -100,7 +100,7 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4a: Rabobank PDF parser → AF, 33 tests groen, gecommit
 - Module 4b: CBS-koppeling → AF met mock-laag, gecommit
 - Module 4c-1: Categorizer keyword-engine → AF (78% coverage), gecommit
-- Module 4c-2: Categorizer AI-fallback → NOG NIET
+- Module 4c-2: Categorizer AI-fallback → AF, 93,9% coverage live, gecommit
 - Module 4d: Inflatieberekening → NOG NIET
 - Module 4e: UI → NOG NIET
 
