@@ -89,6 +89,19 @@ Modulair opgebouwd in losse, onafhankelijke modules:
     breakdown per categorie, en gewichten. UI (4e) bepaalt welk deel 
     getoond wordt aan welke gebruiker. Toekomstige paywall niet in 
     berekening, alleen in UI-laag.
+16. UI is een multi-step wizard op één route (/check) met React state. 
+    Geen aparte routes per stap, geen state in URL of localStorage 
+    (privacy by design).
+
+17. AI-provider wordt gekozen via env var AI_PROVIDER. Lokaal in 
+    .env.local: AI_PROVIDER=mock (geen kosten). Productie in Vercel: 
+    AI_PROVIDER=anthropic (live Haiku). Default als var ontbreekt: mock.
+
+18. Resultaat-scherm bevat één visualisatie (chart) plus tabel-breakdown. 
+    Recharts als library. Geen dashboard met meerdere charts.
+
+19. UI moet zowel count-based (uncategorizedRatio) als euro-based 
+    (uncategorizedSpendingPct) transparantie tonen aan de gebruiker.
 
 
 \## Werkstroom
@@ -115,7 +128,10 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4c-1: Categorizer keyword-engine → AF (78% coverage), gecommit
 - Module 4c-2: Categorizer AI-fallback → AF, 93,9% coverage live, gecommit
 - Module 4d: Inflatieberekening → AF, gecommit
-- Module 4e: UI → NOG NIET
+- Module 4e-1a: Wizard skelet + bank-selectie + upload → BEZIG
+- Module 4e-1b: Categorisatie-correctie → NOG NIET
+- Module 4e-1c: Resultaat-scherm → NOG NIET
+- Module 4e-2: Visuele afwerking, content, copywriting → NOG NIET
 
 ## Open punten voor volgende sessie
 
