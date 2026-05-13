@@ -4,10 +4,19 @@ import {
   readFileSync,
   writeFileSync,
 } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, resolve } from "node:path";
 import type { Transaction } from "@/lib/parsers/types";
-import type { CategoryCode } from "@/lib/cbs/types";
 import type { AiCategoryResult } from "./types";
+
+/**
+ * Repository-relative path of the on-disk AI cache. Exported as a constant
+ * so callers (the API route, scripts, tests) reference one source of truth
+ * and the path is easy to override when moving to Vercel KV / a database.
+ */
+export const PRODUCTION_CACHE_PATH = resolve(
+  process.cwd(),
+  "lib/categorizer/data/ai-cache.json",
+);
 
 /**
  * Get/set of AI verdicts keyed on a *normalised merchant key* (no amounts,
