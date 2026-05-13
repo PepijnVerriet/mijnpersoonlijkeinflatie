@@ -1,14 +1,18 @@
-import type { CbsClient, CpiDataset } from "./types";
-
 /**
- * Client for the CBS StatLine OData API (CPI per COICOP category).
- *
- * TODO: implement fetching + in-memory/localStorage caching.
+ * Provider registry. The rest of the app imports `cbsProvider` from here, so
+ * swapping the mock for a real CBS OData client (table 83131NED) is a
+ * one-line change once the upstream API is back.
  */
-export const cbsClient: CbsClient = {
-  async getCpi(_from: string, _to: string): Promise<CpiDataset> {
-    throw new Error("Not implemented");
-  },
-};
+import { mockProvider } from "./mock-provider";
+import type { CbsInflationProvider } from "./types";
 
-export type { CbsClient, CpiDataset, CpiDataPoint } from "./types";
+export const cbsProvider: CbsInflationProvider = mockProvider;
+
+export { CATEGORIES, CATEGORY_CODES, getCategory } from "./categories";
+export {
+  CbsDataNotAvailableError,
+  type CategoryCode,
+  type CategoryMetadata,
+  type CategoryRates,
+  type CbsInflationProvider,
+} from "./types";
