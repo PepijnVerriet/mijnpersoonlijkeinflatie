@@ -118,6 +118,17 @@ Modulair opgebouwd in losse, onafhankelijke modules:
     Addendum (v1): niet actief. Dropdowns hebben altijd een waarde 
     (AI-suggestie of user-keuze), dus er is geen "open" transactie. 
     Herzien in v2 als een 'skip'-optie nodig blijkt.
+23. Resultaat-scherm toont alle data direct (groot inflatiecijfer, chart, 
+    breakdown-tabel, transparantie-blok). Geen collapsible secties; 
+    de breakdown is de kern, niet een bonus.
+
+24. Chart in resultaat-scherm: staafdiagram met top-categorieën 
+    gesorteerd op bijdrage (gewicht × CBS-rate). Toont visueel welke 
+    categorieën de gebruiker's inflatie het hardst veroorzaken.
+
+25. Zolang CBS-API niet bereikbaar is en we mock-data gebruiken: het 
+    inflatiecijfer toont een subtiel label 'demo waardes' (klein, grijs, 
+    naast het cijfer). Met tooltip of info-icoon voor uitleg.
 
 
 \## Werkstroom
@@ -146,7 +157,7 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4d: Inflatieberekening → AF, gecommit
 - Module 4e-1a: Wizard + bank + upload + review → AF, gecommit
 - Module 4e-1b: Categorisatie-correctie → AF, gecommit
-- Module 4e-1c: Resultaat-scherm → NOG NIET
+- Module 4e-1c: Resultaat-scherm → BEZIG
 - Module 4e-2: Visuele afwerking, content, copywriting → NOG NIET
 
 ## Open punten voor volgende sessie
