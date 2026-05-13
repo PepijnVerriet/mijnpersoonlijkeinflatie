@@ -128,7 +128,7 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4c-1: Categorizer keyword-engine → AF (78% coverage), gecommit
 - Module 4c-2: Categorizer AI-fallback → AF, 93,9% coverage live, gecommit
 - Module 4d: Inflatieberekening → AF, gecommit
-- Module 4e-1a: Wizard skelet + bank-selectie + upload → BEZIG
+- Module 4e-1a: Wizard + bank + upload + review → AF, gecommit
 - Module 4e-1b: Categorisatie-correctie → NOG NIET
 - Module 4e-1c: Resultaat-scherm → NOG NIET
 - Module 4e-2: Visuele afwerking, content, copywriting → NOG NIET
