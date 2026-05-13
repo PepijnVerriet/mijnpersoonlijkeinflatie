@@ -115,6 +115,9 @@ Modulair opgebouwd in losse, onafhankelijke modules:
 22. Doorgaan zonder alles te corrigeren is toegestaan met gentle nudge: 
     'Je hebt X transacties open, die staan voor Y% van je uitgaven 
     in euro's. Wil je toch doorgaan?'. Niet blokkerend.
+    Addendum (v1): niet actief. Dropdowns hebben altijd een waarde 
+    (AI-suggestie of user-keuze), dus er is geen "open" transactie. 
+    Herzien in v2 als een 'skip'-optie nodig blijkt.
 
 
 \## Werkstroom
@@ -142,7 +145,7 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4c-2: Categorizer AI-fallback → AF, 93,9% coverage live, gecommit
 - Module 4d: Inflatieberekening → AF, gecommit
 - Module 4e-1a: Wizard + bank + upload + review → AF, gecommit
-- Module 4e-1b: Categorisatie-correctie → BEZIG
+- Module 4e-1b: Categorisatie-correctie → AF, gecommit
 - Module 4e-1c: Resultaat-scherm → NOG NIET
 - Module 4e-2: Visuele afwerking, content, copywriting → NOG NIET
 
@@ -172,6 +175,10 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - 4e: UI moet adviseren live AI te gebruiken in productie, want mock 
   AI laat dure transacties als huur door (D. Smits €617 in testdata 
   blijft 'unknown' met mock, live AI gokt redelijk op categorie 04).
+- 4e-1c: backend status placeholder werkt nu, moet vervangen worden 
+  door echte inflatie-cijfers + chart (Recharts).
+- v2 mogelijke verbetering: rijkere prompt voor /api/suggest met 
+  description, om edge cases beter te raden (low priority).
 - CBS API endpoint: https://opendata.cbs.nl/ODataApi/OData/83131NED 
   (basis 2015=100). Storing tijdens setup, controleren bij start 4b.
 
