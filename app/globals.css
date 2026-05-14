@@ -2,26 +2,102 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===========================================
+   Mijn Persoonlijke Inflatie — Design tokens
+   =========================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surface */
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface-2: #f1efe9;
+  --surface-3: #ece9e1;
+  --border: #e3dfd5;
+  --border-strong: #cdc8ba;
+
+  /* Ink */
+  --ink-1: #14161a;
+  --ink-2: #3a3d44;
+  --ink-3: #6b6e76;
+  --ink-4: #9a9da4;
+
+  /* Accent — deep navy */
+  --accent: #1a2a4f;
+  --accent-hover: #243869;
+  --accent-soft: #e6e9f1;
+  --accent-on: #ffffff;
+
+  /* Functional */
+  --pos: #1f6e4a;
+  --pos-soft: #dfeae3;
+  --neg: #a13b1a;
+  --neg-soft: #f1e2da;
+  --warn: #8a6a16;
+  --warn-soft: #f3ecd6;
+
+  /* Type — Geist & Geist Mono komen uit lokale next/font, Source Serif 4 uit Google Fonts */
+  --font-sans: var(--font-geist-sans), "Helvetica Neue", system-ui, sans-serif;
+  --font-serif: var(--font-source-serif), "Times New Roman", serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Density (ruim = default) */
+  --d-radius: 10px;
+  --d-radius-sm: 6px;
+  --d-radius-lg: 16px;
+  --pad-card: 28px;
+  --pad-tight: 18px;
+  --gap-section: 56px;
+  --gap-row: 14px;
+  --row-h: 52px;
+  --text-base: 15px;
+  --text-sm: 13px;
+  --text-xs: 11.5px;
+  --text-lg: 17px;
+  --text-xl: 21px;
+  --text-2xl: 28px;
+  --text-3xl: 40px;
+  --text-hero: 96px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+[data-density="compact"] {
+  --pad-card: 18px;
+  --pad-tight: 12px;
+  --gap-section: 36px;
+  --gap-row: 10px;
+  --row-h: 40px;
+  --text-base: 13.5px;
+  --text-sm: 12px;
+  --text-xs: 10.5px;
+  --text-lg: 15px;
+  --text-xl: 18px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
+  --text-hero: 76px;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink-1);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01", "cv11";
+  letter-spacing: -0.005em;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum", "ss01";
   }
 }
