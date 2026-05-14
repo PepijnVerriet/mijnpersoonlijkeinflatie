@@ -139,6 +139,10 @@ Modulair opgebouwd in losse, onafhankelijke modules:
 
 28. Referentie-implementatie staat in design-reference/ (gitignored). 
     Niet als productie-code gebruiken; alleen visueel naslagwerk.
+29. Wizard-schermen (/check route) gebruiken de Topbar van het nieuwe 
+    design voor oriëntatie en wegterug-mogelijkheid, maar geen Footer 
+    (om focus op de stap te behouden). Het resultaat-scherm heeft wel 
+    een Footer.
 
 
 \## Werkstroom
@@ -170,7 +174,7 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4e-1b: Categorisatie-correctie → AF, gecommit
 - Module 4e-1c: Resultaat-scherm → AF, gecommit
 - Module 4e-2 sessie A: Tokens + landingspagina → AF, gecommit
-- Module 4e-2 sessie B: Wizard + resultaat migratie → NOG NIET
+- Module 4e-2 sessie B: Wizard + resultaat migratie → BEZIG
 - Deployment: GitHub + Vercel + domain → NOG NIET
 - Deployment → NOG NIET
 
