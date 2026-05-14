@@ -129,6 +129,16 @@ Modulair opgebouwd in losse, onafhankelijke modules:
 25. Zolang CBS-API niet bereikbaar is en we mock-data gebruiken: het 
     inflatiecijfer toont een subtiel label 'demo waardes' (klein, grijs, 
     naast het cijfer). Met tooltip of info-icoon voor uitleg.
+26. Visuele identiteit: navy accent (#1a2a4f), warm cream achtergrond 
+    (#f7f6f3), serif voor cijfers (Source Serif 4), Geist voor UI. 
+    Design tokens leven in app/globals.css als CSS custom properties.
+
+27. Styling-aanpak hybride: globale tokens.css voor design-systeem 
+    (kleuren, typografie, spacing variables). Tailwind utility classes 
+    voor layout (flex, grid, sizing).
+
+28. Referentie-implementatie staat in design-reference/ (gitignored). 
+    Niet als productie-code gebruiken; alleen visueel naslagwerk.
 
 
 \## Werkstroom
@@ -159,7 +169,9 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4e-1a: Wizard + bank + upload + review → AF, gecommit
 - Module 4e-1b: Categorisatie-correctie → AF, gecommit
 - Module 4e-1c: Resultaat-scherm → AF, gecommit
-- Module 4e-2: Visuele afwerking, content, copywriting → NOG NIET
+- Module 4e-2 sessie A: Tokens + landingspagina migratie → BEZIG
+- Module 4e-2 sessie B: Wizard + resultaat migratie → NOG NIET
+- Deployment: GitHub + Vercel + domain → NOG NIET
 - Deployment → NOG NIET
 
 ## Open punten voor volgende sessie
