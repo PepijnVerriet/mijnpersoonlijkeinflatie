@@ -169,7 +169,7 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4e-1a: Wizard + bank + upload + review → AF, gecommit
 - Module 4e-1b: Categorisatie-correctie → AF, gecommit
 - Module 4e-1c: Resultaat-scherm → AF, gecommit
-- Module 4e-2 sessie A: Tokens + landingspagina migratie → BEZIG
+- Module 4e-2 sessie A: Tokens + landingspagina → AF, gecommit
 - Module 4e-2 sessie B: Wizard + resultaat migratie → NOG NIET
 - Deployment: GitHub + Vercel + domain → NOG NIET
 - Deployment → NOG NIET
