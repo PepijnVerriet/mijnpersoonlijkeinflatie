@@ -5,9 +5,5 @@ export const metadata = {
 };
 
 export default function CheckPage() {
-  return (
-    <main className="min-h-screen bg-gray-50">
-      <Wizard />
-    </main>
-  );
+  return <Wizard />;
 }

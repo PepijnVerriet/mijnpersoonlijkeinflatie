@@ -1,6 +1,15 @@
 "use client";
 
 import { useRef, useState, type DragEvent } from "react";
+import { Button } from "@/components/ui/Button";
+import {
+  ArrowIcon,
+  FileIcon,
+  LockIcon,
+  SparkIcon,
+  UploadIcon,
+  XIcon,
+} from "@/components/ui/icons";
 import { Spinner } from "./Spinner";
 
 const MAX_BYTES = 10 * 1024 * 1024;
@@ -64,90 +73,123 @@ export function StepUpload({
   };
 
   return (
-    <section>
-      <h2 className="mb-2 text-xl font-semibold text-gray-900">
+    <section className="mx-auto max-w-[880px] px-[22px] py-8 md:px-12 md:py-16">
+      <span className="text-[11.5px] font-medium uppercase tracking-[0.12em] text-ink-3">
+        Upload · Rabobank
+      </span>
+      <h1 className="m-0 mb-3.5 mt-3 font-serif text-[32px] font-medium tracking-[-0.02em] text-ink-1 md:text-[44px]">
         Upload je bankafschrift
-      </h2>
-      <p className="mb-6 text-sm text-gray-600">
-        Sleep een Rabobank PDF-afschrift hierheen, of klik om te bladeren. Voor
-        een nauwkeurig persoonlijk inflatiecijfer raden we twaalf maanden aan;
-        één maand werkt ook, maar geeft een grovere schatting.
+      </h1>
+      <p className="m-0 mb-8 max-w-[560px] text-[15px] leading-[1.55] text-ink-2">
+        We raden twaalf maanden aan voor het meest accurate resultaat. Eén maand
+        werkt ook, maar eenmalige uitgaven kunnen je cijfer dan vertekenen.
       </p>
 
-      <label
-        htmlFor="file-input"
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={onDrop}
-        className={`flex min-h-48 cursor-pointer flex-col items-center justify-center gap-2 rounded border-2 border-dashed p-6 text-center text-sm transition-colors ${
-          dragOver
-            ? "border-blue-500 bg-blue-50"
-            : "border-gray-300 bg-white hover:border-blue-400 hover:bg-blue-50"
-        }`}
-      >
-        {file ? (
-          <>
-            <span className="text-base font-medium text-gray-900">
+      {file ? (
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-[18px] rounded-token border border-border bg-surface p-[22px]">
+          <div className="grid h-[42px] w-[42px] place-items-center rounded-lg bg-surface-2 text-ink-2">
+            <FileIcon size={18} />
+          </div>
+          <div className="min-w-0">
+            <div className="truncate text-[14.5px] font-medium text-ink-1">
               {file.name}
+            </div>
+            <div className="mt-0.5 font-mono text-[12.5px] text-ink-3">
+              {fmtSize(file.size)}
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              onClearFile();
+              if (inputRef.current) inputRef.current.value = "";
+              setLocalError(null);
+            }}
+            disabled={loading}
+          >
+            <XIcon size={12} /> ander bestand
+          </Button>
+        </div>
+      ) : (
+        <label
+          htmlFor="file-input"
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          className={`block cursor-pointer rounded-token-lg border-[1.5px] border-dashed p-12 text-center transition-colors md:p-[72px] ${
+            dragOver
+              ? "border-accent bg-accent-soft"
+              : "border-border-strong bg-surface hover:border-accent/60 hover:bg-accent-soft/40"
+          }`}
+        >
+          <div className="mx-auto mb-[18px] grid h-14 w-14 place-items-center rounded-xl bg-accent-soft text-accent">
+            <UploadIcon size={22} />
+          </div>
+          <div className="mb-1.5 text-[17px] font-medium tracking-[-0.01em] text-ink-1">
+            Sleep je PDF hierheen
+          </div>
+          <div className="text-[13.5px] text-ink-3">
+            of{" "}
+            <span className="text-accent underline underline-offset-2">
+              klik om te bladeren
             </span>
-            <span className="text-xs text-gray-500">{fmtSize(file.size)}</span>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                onClearFile();
-                if (inputRef.current) inputRef.current.value = "";
-              }}
-              className="mt-2 text-xs text-blue-600 underline hover:text-blue-800"
-            >
-              Ander bestand kiezen
-            </button>
-          </>
-        ) : (
-          <>
-            <span className="text-base text-gray-700">
-              Sleep PDF hierheen of klik om te bladeren
-            </span>
-            <span className="text-xs text-gray-500">
-              Maximaal 10 MB, alleen PDF
-            </span>
-          </>
-        )}
-        <input
-          ref={inputRef}
-          id="file-input"
-          type="file"
-          accept="application/pdf,.pdf"
-          className="sr-only"
-          onChange={(e) => handleFiles(e.target.files)}
-        />
-      </label>
+          </div>
+          <div className="mt-7 font-mono text-[11.5px] tracking-[0.04em] text-ink-4">
+            PDF · max 10 MB · Rabobank-formaat
+          </div>
+          <input
+            ref={inputRef}
+            id="file-input"
+            type="file"
+            accept="application/pdf,.pdf"
+            className="sr-only"
+            onChange={(e) => handleFiles(e.target.files)}
+          />
+        </label>
+      )}
 
       {localError && (
-        <p role="alert" className="mt-3 text-sm text-red-700">
+        <p role="alert" className="mt-3 text-sm text-neg">
           {localError}
         </p>
       )}
 
-      <div className="mt-6 flex items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          disabled={loading}
-          className="rounded border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-50"
-        >
-          Terug
-        </button>
+      <div className="mt-[22px] grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div className="flex items-start gap-3 rounded-token bg-surface-2 p-4">
+          <div className="mt-0.5 text-accent">
+            <LockIcon size={13} />
+          </div>
+          <div className="text-[12.5px] leading-[1.5] text-ink-2">
+            Je PDF wordt in <strong className="font-medium">jouw browser</strong>{" "}
+            uitgelezen. Niets gaat naar onze servers behalve geanonimiseerde
+            merchant-namen.
+          </div>
+        </div>
+        <div className="flex items-start gap-3 rounded-token bg-surface-2 p-4">
+          <div className="mt-0.5 text-accent">
+            <SparkIcon size={13} />
+          </div>
+          <div className="text-[12.5px] leading-[1.5] text-ink-2">
+            Heb je twaalf afschriften? In v1 verwerken we er één per upload.
+            Meerdere maanden tegelijk komt eraan.
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-9 flex flex-wrap items-center justify-between gap-3">
+        <Button variant="secondary" onClick={onBack} disabled={loading}>
+          <ArrowIcon size={14} dir="left" /> Vorige
+        </Button>
         <div className="flex items-center gap-3">
           {loading && <Spinner label="PDF verwerken…" />}
-          <button
-            type="button"
+          <Button
+            variant="primary"
             onClick={onProcess}
             disabled={!file || loading}
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:cursor-not-allowed disabled:bg-blue-300"
           >
-            Verwerk afschrift
-          </button>
+            Verwerk transacties <ArrowIcon size={14} />
+          </Button>
         </div>
       </div>
     </section>

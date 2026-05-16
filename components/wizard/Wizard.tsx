@@ -15,7 +15,7 @@ import {
 import type { CategoryCode } from "@/lib/cbs/types";
 import type { InflationCalculation } from "@/lib/inflation/types";
 import { ErrorBanner } from "./ErrorBanner";
-import { ProgressIndicator } from "./ProgressIndicator";
+import { StepBar } from "./StepBar";
 import { StepBank } from "./StepBank";
 import { StepCorrect } from "./StepCorrect";
 import { StepResult } from "./StepResult";
@@ -294,8 +294,8 @@ export function Wizard() {
   }, [state.processResult, state.suggestions, state.userCategories, state.suggestionsFallback]);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
-      <ProgressIndicator current={state.step} />
+    <>
+      <StepBar current={state.step} />
 
       {state.error && (
         <ErrorBanner
@@ -355,6 +355,6 @@ export function Wizard() {
           onReset={() => dispatch({ type: "RESET" })}
         />
       )}
-    </div>
+    </>
   );
 }
