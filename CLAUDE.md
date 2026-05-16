@@ -229,8 +229,9 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4e-2 sessie A: Tokens + landingspagina → AF, gecommit
 - Module 4e-2 sessie B: Wizard + resultaat migratie → AF, gecommit
 - Module 5a: Categorieën definitie + coicop-mapping → AF, gecommit
-- Module 5b: CbsApiProvider implementatie → BEZIG
-- Module 5c-g: zie principe 33 → NOG NIET
+- Module 5b: CbsApiProvider implementatie → AF, gecommit
+- Module 5c: mock-rates uitbreiden naar 14 categorieën → NOG NIET
+- Module 5d-g: zie principe 33 → NOG NIET
 - Privacy-pagina → NOG NIET
 - GitHub + Vercel deployment → NOG NIET
 
@@ -246,6 +247,9 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
   node_modules / .next bij dev)
 - Optioneel voor v2: "Deel je inflatie" knop activeren (nu placeholder 
   met alert)
+- v2 optimalisatie: negative cache binnen calculate-scope om 13× 
+  fallback-latency bij CBS-storing te voorkomen. Nu wordt bij elke 
+  categorie binnen één request opnieuw geprobeerd live te halen.
 - Voor module 4c: iDEAL-transacties tussen vrienden via Rabo Betaalverzoek 
   hebben geen merchant, alleen een omschrijving (bijv. "Sloffen", 
   "Stadscafe"). Categorizer moet voor code "id" en "bv" terugvallen op 
