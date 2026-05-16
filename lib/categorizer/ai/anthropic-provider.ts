@@ -75,6 +75,10 @@ REGELS:
 - Format: JSON-array met objecten {transactionId, category}`;
 
 /** Safe fallback when even the strict prompt cannot yield a category. */
+// TODO 5e: SUGGESTION_FALLBACK was "12" (Diverse in COICOP-99).
+// Na refactor is "12" Verzekeringen; semantische fallback moet "13" worden.
+// De prompt-tekst hierboven (regel 71-73) verwijst óók nog naar "01-12" en
+// "kies 12" — herwerken samen met deze constant in stap 5e.
 const SUGGESTION_FALLBACK: CategoryCode = "12";
 
 /** Minimal slice of the SDK we actually use — easy to fake in tests. */

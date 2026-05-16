@@ -11,20 +11,29 @@ import type { Transaction } from "@/lib/parsers/types";
 /** Identifier for a supported bank. */
 export type BankId = "rabobank" | "ing" | "abnamro";
 
-/** COICOP top-level division codes used by CBS for the CPI. */
+/**
+ * COICOP top-level division codes (CBS COICOP-2018 schema, NL-specifiek).
+ *
+ * Codes 01-13 are the CBS-published COICOP-2018 divisions used by table
+ * 86141NED. Code 14 is a project-internal "system" category for taxes and
+ * non-consumption transfers that get filtered out before inflation maths;
+ * it has no CBS counterpart (see lib/cbs/coicop-mapping.ts).
+ */
 export type CoicopCode =
   | "01" // Food and non-alcoholic beverages
   | "02" // Alcoholic beverages and tobacco
   | "03" // Clothing and footwear
-  | "04" // Housing, water, electricity, gas and other fuels
-  | "05" // Furnishings, household equipment and routine maintenance
+  | "04" // Housing and utilities
+  | "05" // Household goods and services
   | "06" // Health
   | "07" // Transport
-  | "08" // Communication
-  | "09" // Recreation and culture
+  | "08" // Information and communication (COICOP-2018, new)
+  | "09" // Recreation, sport and culture
   | "10" // Education
-  | "11" // Restaurants and hotels
-  | "12"; // Miscellaneous goods and services
+  | "11" // Restaurants and accommodation
+  | "12" // Insurance and financial services (COICOP-2018, new)
+  | "13" // Miscellaneous goods and services (was COICOP-99 code 12)
+  | "14"; // Taxes (system-only, filtered out — no CBS counterpart)
 
 /** A COICOP category with English and Dutch labels. */
 export interface CoicopCategory {

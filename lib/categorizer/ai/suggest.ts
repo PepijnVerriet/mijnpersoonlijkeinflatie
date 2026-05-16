@@ -3,6 +3,8 @@ import type { Transaction } from "@/lib/parsers/types";
 import type { AiProvider } from "./types";
 
 const SUGGEST_BATCH_SIZE = 10;
+// TODO 5e: SUGGESTION_FALLBACK was "12" (Diverse in COICOP-99).
+// Na refactor is "12" Verzekeringen; semantische fallback moet "13" worden.
 const SUGGESTION_FALLBACK: CategoryCode = "12";
 
 /**

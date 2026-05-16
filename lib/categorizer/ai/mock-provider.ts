@@ -28,6 +28,8 @@ function classify(item: AiCategorizationItem): AiCategoryResult {
 }
 
 /** Fallback when the mock cannot produce a confident category. */
+// TODO 5e: SUGGESTION_FALLBACK was "12" (Diverse in COICOP-99).
+// Na refactor is "12" Verzekeringen; semantische fallback moet "13" worden.
 const SUGGESTION_FALLBACK: CategoryCode = "12";
 
 export const mockAiProvider: AiProvider = {
