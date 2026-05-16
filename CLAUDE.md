@@ -143,7 +143,15 @@ Modulair opgebouwd in losse, onafhankelijke modules:
     design voor oriëntatie en wegterug-mogelijkheid, maar geen Footer 
     (om focus op de stap te behouden). Het resultaat-scherm heeft wel 
     een Footer.
+30. CBS-koppeling gebruikt tabel 86141NED (Consumentenprijzen; CPI 
+    2025=100, index en mutaties) via de Open Data API. Dataset is 
+    sinds 2026 in gebruik, vervangt het oude 83131NED met referentiejaar 
+    2015. Mapping van interne CategoryCode naar CBS COICOP gebeurt 
+    expliciet in lib/cbs/coicop-mapping.ts.
 
+31. CBS-provider implementeert dezelfde interface als de mock-provider 
+    (CbsProvider). Bij API-fout: graceful fallback naar mock-provider 
+    met logging. Voorkomt dat één CBS-storing de hele app blokkeert.
 
 \## Werkstroom
 
@@ -175,8 +183,10 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4e-1c: Resultaat-scherm → AF, gecommit
 - Module 4e-2 sessie A: Tokens + landingspagina → AF, gecommit
 - Module 4e-2 sessie B: Wizard + resultaat migratie → AF, gecommit
+- Module 5: CBS-koppeling (echte data, geen mock meer) → BEZIG
 - Privacy-pagina → NOG NIET
-- Deployment: GitHub + Vercel + domain → NOG NIET
+- GitHub + Vercel deployment → NOG NIET
+
 
 ## Open punten voor volgende sessie
 
