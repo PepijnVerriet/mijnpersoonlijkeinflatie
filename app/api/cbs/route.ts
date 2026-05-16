@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { cbsProvider } from "@/lib/cbs";
+import { getCbsProvider } from "@/lib/cbs";
 import { isValidMonth } from "@/lib/cbs/mock-provider";
 import { CbsDataNotAvailableError } from "@/lib/cbs/types";
 
@@ -17,7 +17,8 @@ export async function GET(req: Request): Promise<Response> {
   }
 
   try {
-    const rates = await cbsProvider.getMonthlyRates(month);
+    const cbs = getCbsProvider();
+    const rates = await cbs.provider.getMonthlyRates(month);
     return NextResponse.json(
       { month, rates },
       { status: 200, headers: { "Cache-Control": CACHE_HEADER } },

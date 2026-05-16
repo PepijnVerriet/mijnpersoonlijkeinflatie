@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { cbsProvider } from "@/lib/cbs";
-import { mockProvider } from "@/lib/cbs/mock-provider";
+import { getCbsProvider } from "@/lib/cbs";
 import type { CategoryCode } from "@/lib/cbs/types";
 import {
   calculateInflation,
@@ -21,8 +20,10 @@ interface CalculateRequestTransaction {
 
 export interface CalculateMeta {
   /**
-   * True while the CBS layer is still served by the mock provider; flipped
-   * automatically once `cbsProvider` is rewired to a real CBS-API client.
+   * True als deze berekening (op zijn minst ten dele) op mock-data is
+   * uitgekomen — direct (CBS_PROVIDER niet 'live') of via fallback nadat
+   * een live-call faalde. Drijft de "demo waardes"-badge en eventuele
+   * "CBS tijdelijk niet bereikbaar" banner in de UI.
    */
   usingMockData: boolean;
   /** ISO timestamp of when the server computed the result. */
@@ -93,13 +94,14 @@ export async function POST(req: Request): Promise<Response> {
   );
 
   try {
-    const calculation = await calculateInflation(categorizationResults);
+    const cbs = getCbsProvider();
+    const calculation = await calculateInflation(categorizationResults, {
+      cbsProvider: cbs.provider,
+    });
     const response: CalculateResponse = {
       calculation,
       meta: {
-        // Identity check tegen mockProvider singleton; werkt automatisch
-        // zodra cbsProvider naar een echte provider verwijst.
-        usingMockData: cbsProvider === mockProvider,
+        usingMockData: cbs.usingMockData,
         calculatedAt: new Date().toISOString(),
       },
     };

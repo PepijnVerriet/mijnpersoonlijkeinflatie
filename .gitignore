@@ -19,6 +19,9 @@ lib/categorizer/data/user-corrections.log
 # from real uploads. Per-user / per-deploy artefact, not source-of-truth.
 lib/categorizer/data/ai-cache.json
 
+# CBS API response cache — per-deploy artefact, 24h TTL.
+lib/cbs/data/api-cache.json
+
 # next.js
 /.next/
 /out/
