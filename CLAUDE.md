@@ -186,6 +186,17 @@ Modulair opgebouwd in losse, onafhankelijke modules:
     5c mock-data uitbreiden, 5d keywords herwerken, 5e AI-prompts + 
     cache reset, 5f UI controles, 5g end-to-end. Elke stap apart 
     gecommit, niet alles tegelijk.
+31. CbsProvider interface: implementaties zijn mockProvider (lokale 
+    JSON) en cbsApiProvider (live API). 
+    
+    Strategie: altijd live in productie, mock alleen als fallback bij 
+    API-fout. Bij fallback: usingMockData flag wordt true, "CBS 
+    tijdelijk niet bereikbaar" banner verschijnt in UI plus "demo 
+    waardes" label naast inflatiecijfer (zoals al geïmplementeerd in 
+    4e-1c).
+    
+    Caching: JSON-bestand met TTL (24h), analoog aan ai-cache.json. 
+    Bestand staat in lib/cbs/data/api-cache.json, gitignored.
 
 \## Werkstroom
 
@@ -217,8 +228,8 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4e-1c: Resultaat-scherm → AF, gecommit
 - Module 4e-2 sessie A: Tokens + landingspagina → AF, gecommit
 - Module 4e-2 sessie B: Wizard + resultaat migratie → AF, gecommit
-- Module 5a: Categorieën definitie + coicop-mapping → BEZIG
-- Module 5b: CbsApiProvider implementatie → NOG NIET
+- Module 5a: Categorieën definitie + coicop-mapping → AF, gecommit
+- Module 5b: CbsApiProvider implementatie → BEZIG
 - Module 5c-g: zie principe 33 → NOG NIET
 - Privacy-pagina → NOG NIET
 - GitHub + Vercel deployment → NOG NIET
