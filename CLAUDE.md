@@ -174,17 +174,21 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4e-1b: Categorisatie-correctie → AF, gecommit
 - Module 4e-1c: Resultaat-scherm → AF, gecommit
 - Module 4e-2 sessie A: Tokens + landingspagina → AF, gecommit
-- Module 4e-2 sessie B: Wizard + resultaat migratie → BEZIG
+- Module 4e-2 sessie B: Wizard + resultaat migratie → AF, gecommit
+- Privacy-pagina → NOG NIET
 - Deployment: GitHub + Vercel + domain → NOG NIET
-- Deployment → NOG NIET
 
 ## Open punten voor volgende sessie
 
-- **Eerste actie morgen**: walkthrough doen met maart 2026 PDF en 
-  verifiëren dat "Schotland" en "Vrij Spaargeld" nu zijn verdwenen uit 
-  de transactie-lijst (parser-filter-fix uit deze sessie).
-- **Daarna**: 4e-2 starten — visuele afwerking, landingspagina, 
-  microcopy, privacy-pagina.
+- **Privacy-pagina maken** (laatste content-blok voor de app)
+- **GitHub repo aanmaken en initiale push**
+- **Vercel project setup en deployment**
+- **Domain hookup**: mijnpersoonlijkeinflatie.nl koppelen aan Vercel
+- **OneDrive issue**: projectmap verplaatsen naar `C:\Dev\` voor schone 
+  werkomgeving (OneDrive-sync veroorzaakt soms file-lock issues op 
+  node_modules / .next bij dev)
+- Optioneel voor v2: "Deel je inflatie" knop activeren (nu placeholder 
+  met alert)
 - Voor module 4c: iDEAL-transacties tussen vrienden via Rabo Betaalverzoek 
   hebben geen merchant, alleen een omschrijving (bijv. "Sloffen", 
   "Stadscafe"). Categorizer moet voor code "id" en "bv" terugvallen op 
@@ -209,8 +213,6 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - 4e: UI moet adviseren live AI te gebruiken in productie, want mock 
   AI laat dure transacties als huur door (D. Smits €617 in testdata 
   blijft 'unknown' met mock, live AI gokt redelijk op categorie 04).
-- 4e-1c: backend status placeholder werkt nu, moet vervangen worden 
-  door echte inflatie-cijfers + chart (Recharts).
 - v2 mogelijke verbetering: rijkere prompt voor /api/suggest met 
   description, om edge cases beter te raden (low priority).
 - CBS API endpoint: https://opendata.cbs.nl/ODataApi/OData/83131NED 
