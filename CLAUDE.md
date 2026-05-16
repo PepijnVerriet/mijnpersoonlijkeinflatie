@@ -152,6 +152,40 @@ Modulair opgebouwd in losse, onafhankelijke modules:
 31. CBS-provider implementeert dezelfde interface als de mock-provider 
     (CbsProvider). Bij API-fout: graceful fallback naar mock-provider 
     met logging. Voorkomt dat één CBS-storing de hele app blokkeert.
+30. CBS-koppeling gebruikt tabel 86141NED (Consumentenprijzen; CPI 
+    2025=100, index en mutaties) via Open Data API. URL-prefix 
+    https://opendata.cbs.nl/ODataApi/odata/86141NED. Periode-formaat 
+    JJJJMM (bijv. "2026MM03"). Velden via CPI-prefix coderingsschema 
+    (bijv. "CPI010000" voor categorie 01).
+
+31. CbsProvider interface: implementaties zijn mockProvider (lokale 
+    JSON) en cbsApiProvider (live API). Bij API-fout: graceful fallback 
+    naar mock met logging. Voorkomt dat één CBS-storing de app blokkeert.
+
+32. Categorieën uitgebreid van 12 (COICOP-99) naar 14 (COICOP-2018, 
+    NL-specifiek). Mapping:
+    - 01 Voeding en alcoholvrije dranken
+    - 02 Alcoholhoudende dranken en tabak  
+    - 03 Kleding en schoenen
+    - 04 Huisvesting en nutsvoorzieningen
+    - 05 Huishoudelijke goederen en diensten
+    - 06 Gezondheid
+    - 07 Vervoer
+    - 08 Informatie en communicatie (NIEUW)
+    - 09 Recreatie, sport en cultuur
+    - 10 Onderwijs
+    - 11 Restaurants en accommodaties
+    - 12 Verzekeringen en financiële diensten (NIEUW)
+    - 13 Diverse goederen en diensten (voorheen 12)
+    - 14 Belastingen (systeem-categorie, uitgefilterd in parser)
+    
+    CBS-categorie 150000 (consumptie buitenland) wordt niet gebruikt. 
+    Reden: niet betrouwbaar te detecteren in transactie-data.
+
+33. Module 5 gefaseerd: 5a categorieën-definitie, 5b CbsApiProvider, 
+    5c mock-data uitbreiden, 5d keywords herwerken, 5e AI-prompts + 
+    cache reset, 5f UI controles, 5g end-to-end. Elke stap apart 
+    gecommit, niet alles tegelijk.
 
 \## Werkstroom
 
@@ -183,7 +217,9 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4e-1c: Resultaat-scherm → AF, gecommit
 - Module 4e-2 sessie A: Tokens + landingspagina → AF, gecommit
 - Module 4e-2 sessie B: Wizard + resultaat migratie → AF, gecommit
-- Module 5: CBS-koppeling (echte data, geen mock meer) → BEZIG
+- Module 5a: Categorieën definitie + coicop-mapping → BEZIG
+- Module 5b: CbsApiProvider implementatie → NOG NIET
+- Module 5c-g: zie principe 33 → NOG NIET
 - Privacy-pagina → NOG NIET
 - GitHub + Vercel deployment → NOG NIET
 
