@@ -1,4 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
+import {
+  USER_FACING_CATEGORIES,
+  USER_FACING_CATEGORY_CODES,
+} from "@/lib/cbs/categories";
 import type { CategoryCode } from "@/lib/cbs/types";
 import type {
   AiCategorizationItem,
@@ -17,30 +21,47 @@ export const AI_MODEL_ID = "claude-haiku-4-5-20251001";
 /** Wait between the first failed call and the single retry (CLAUDE.md). */
 export const RETRY_DELAY_MS = 2_000;
 
-/** Categories the model is allowed to return (plus "unknown"). */
-const VALID_CATEGORIES = new Set([
-  "01", "02", "03", "04", "05", "06",
-  "07", "08", "09", "10", "11", "12",
-]);
+/**
+ * Categories the model is allowed to return (plus "unknown"). Derived from
+ * USER_FACING_CATEGORY_CODES so system-only codes (e.g. 14 Belastingen) are
+ * automatically excluded.
+ */
+const VALID_CATEGORIES = new Set<string>(USER_FACING_CATEGORY_CODES);
 
-const SYSTEM_PROMPT = `Je categoriseert Nederlandse bankuitgaven naar COICOP-hoofdcategorieën (01-12).
+/**
+ * Prompt-specific hints per category. Kept here (not in categories.ts) because
+ * they are tuned for the AI prompt and may change independently of canonical
+ * category metadata.
+ */
+const CATEGORY_HINTS: Record<string, string> = {
+  "01": "supermarkten, bakkers, slagers",
+  "02": "slijterijen, tabakszaken",
+  "03": "kleding, schoenen",
+  "04": "huur, hypotheek, gas/licht, water",
+  "05": "meubels, huishoudelijke apparaten, schoonmaak, gereedschap",
+  "06": "apotheek, tandarts, ziekenhuis, fysiotherapie",
+  "07": "benzine, OV, auto-onderhoud, parkeren, taxi/Uber",
+  "08": "internet, mobiele abonnementen, software-abonnementen (Adobe, MS365), post",
+  "09": "bioscoop, streaming (Netflix/Spotify), sport, hobby, games, AV-elektronica",
+  "10": "collegegeld, online cursussen (Coursera/Udemy/MasterClass), schoolboeken",
+  "11": "restaurants, fastfood, kantines, hotels, vakantieverblijf",
+  "12": "verzekeringen (zorg, auto, woon, leven, uitvaart), bankkosten",
+  "13": "kapper, schoonheid, persoonlijke verzorging, juridisch advies",
+};
+
+function buildCategoryList(): string {
+  return USER_FACING_CATEGORIES
+    .map((c) => `${c.code} = ${c.name} (${CATEGORY_HINTS[c.code]})`)
+    .join("\n");
+}
+
+const SYSTEM_PROMPT = `Je categoriseert Nederlandse bankuitgaven naar COICOP-hoofdcategorieën (01-13).
 
 CATEGORIEËN:
-01 = Voedingsmiddelen en alcoholvrije dranken (supermarkten, bakkers)
-02 = Alcoholische dranken en tabak (slijterijen, tabakszaken)
-03 = Kleding en schoenen
-04 = Wonen, water en energie (huur, hypotheek, gas/licht, water, internet voor thuis)
-05 = Stoffering, huishoudelijke artikelen en gereedschap
-06 = Gezondheid (apotheek, tandarts, zorgverzekering)
-07 = Vervoer (benzine, OV, auto-onderhoud, parkeren, taxi/Uber)
-08 = Communicatie (mobiele abonnementen, post)
-09 = Recreatie en cultuur (bioscoop, streaming, sport, hobby)
-10 = Onderwijs (collegegeld, cursussen, schoolboeken)
-11 = Restaurants en hotels (uitgaan, hotels, kantines, fastfood)
-12 = Diverse goederen en diensten (kapper, schoonheid, juridisch, financieel advies)
+${buildCategoryList()}
 
 REGELS:
-- Antwoord per transactie met EEN code (01-12) OF "unknown"
+- Antwoord per transactie met EEN code (01-13) OF "unknown"
 - "unknown" alleen als je echt geen redelijke gok kunt maken
 - Tikkies en betaalverzoeken: gebruik de beschrijving NA de naam ("Bouman: Cafetaria Marktzicht" → 11)
 - Giften, terugbetalingen tussen vrienden, salaris, of interne overboekingen: "unknown" (worden niet meegerekend)
@@ -51,35 +72,20 @@ REGELS:
  * item. The UI shows these as pre-selected dropdown values that the user can
  * still override; "unknown" would just punt the work back to them.
  */
-const SUGGESTION_SYSTEM_PROMPT = `Je categoriseert Nederlandse bankuitgaven naar COICOP-hoofdcategorieën (01-12).
+const SUGGESTION_SYSTEM_PROMPT = `Je categoriseert Nederlandse bankuitgaven naar COICOP-hoofdcategorieën (01-13).
 
 CATEGORIEËN:
-01 = Voedingsmiddelen en alcoholvrije dranken (supermarkten, bakkers)
-02 = Alcoholische dranken en tabak (slijterijen, tabakszaken)
-03 = Kleding en schoenen
-04 = Wonen, water en energie (huur, hypotheek, gas/licht, water, internet voor thuis)
-05 = Stoffering, huishoudelijke artikelen en gereedschap
-06 = Gezondheid (apotheek, tandarts, zorgverzekering)
-07 = Vervoer (benzine, OV, auto-onderhoud, parkeren, taxi/Uber)
-08 = Communicatie (mobiele abonnementen, post)
-09 = Recreatie en cultuur (bioscoop, streaming, sport, hobby)
-10 = Onderwijs (collegegeld, cursussen, schoolboeken)
-11 = Restaurants en hotels (uitgaan, hotels, kantines, fastfood)
-12 = Diverse goederen en diensten (kapper, schoonheid, juridisch, financieel advies)
+${buildCategoryList()}
 
 REGELS:
-- Geef ALTIJD een categorie 01-12, ook bij twijfel. Dit is een suggestie die de gebruiker kan corrigeren.
+- Geef ALTIJD een categorie 01-13, ook bij twijfel. Dit is een suggestie die de gebruiker kan corrigeren.
 - Kies de meest waarschijnlijke categorie op basis van merchant en omschrijving.
-- Bij volstrekt geen aanknopingspunten: kies 12 (diverse goederen en diensten).
+- Bij volstrekt geen aanknopingspunten: kies 13 (diverse goederen en diensten).
 - Tikkies en betaalverzoeken: gebruik de beschrijving NA de naam.
 - Format: JSON-array met objecten {transactionId, category}`;
 
 /** Safe fallback when even the strict prompt cannot yield a category. */
-// TODO 5e: SUGGESTION_FALLBACK was "12" (Diverse in COICOP-99).
-// Na refactor is "12" Verzekeringen; semantische fallback moet "13" worden.
-// De prompt-tekst hierboven (regel 71-73) verwijst óók nog naar "01-12" en
-// "kies 12" — herwerken samen met deze constant in stap 5e.
-const SUGGESTION_FALLBACK: CategoryCode = "12";
+const SUGGESTION_FALLBACK: CategoryCode = "13";
 
 /** Minimal slice of the SDK we actually use — easy to fake in tests. */
 export interface AnthropicLike {
@@ -292,7 +298,7 @@ export class AnthropicAiProvider implements AiProvider {
    * Best-guess pass for items the standard flow returned "unknown" for.
    * Uses {@link SUGGESTION_SYSTEM_PROMPT} so the model is forced to commit
    * to a category. Any leftover "unknown" or unparseable result falls back
-   * to category 12 (Diverse goederen en diensten).
+   * to category 13 (Diverse goederen en diensten).
    */
   async suggestBatch(items: AiCategorizationItem[]): Promise<AiSuggestionResponse[]> {
     if (items.length === 0) return [];

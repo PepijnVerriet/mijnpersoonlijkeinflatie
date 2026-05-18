@@ -3,16 +3,14 @@ import type { Transaction } from "@/lib/parsers/types";
 import type { AiProvider } from "./types";
 
 const SUGGEST_BATCH_SIZE = 10;
-// TODO 5e: SUGGESTION_FALLBACK was "12" (Diverse in COICOP-99).
-// Na refactor is "12" Verzekeringen; semantische fallback moet "13" worden.
-const SUGGESTION_FALLBACK: CategoryCode = "12";
+const SUGGESTION_FALLBACK: CategoryCode = "13";
 
 /**
  * Best-guess categorisation for items that landed in the "unknown" bucket.
  *
  * Calls `provider.suggestBatch` in batches of {@link SUGGEST_BATCH_SIZE}.
  * Falls back to running `categorizeBatch` and substituting any leftover
- * "unknown" with category 12 when the provider does not implement
+ * "unknown" with category 13 when the provider does not implement
  * `suggestBatch` (or when the call throws). The returned map is keyed on
  * the *original* index in the input array, mirroring `categorizeWithAi`.
  *

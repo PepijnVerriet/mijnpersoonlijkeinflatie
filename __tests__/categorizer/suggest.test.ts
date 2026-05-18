@@ -40,14 +40,14 @@ describe("suggestCategories — mock provider", () => {
     }
   });
 
-  it("substitutes mock 'unknown' verdicts with category 12", async () => {
+  it("substitutes mock 'unknown' verdicts with category 13", async () => {
     const txs = [
       tx({ description: "Bouman" }), // mock returns 'unknown'
       tx({ description: "PayPal Luxembourg" }), // 'unknown'
     ];
     const out = await suggestCategories(txs, mockAiProvider);
-    expect(out.get(0)).toBe("12");
-    expect(out.get(1)).toBe("12");
+    expect(out.get(0)).toBe("13");
+    expect(out.get(1)).toBe("13");
   });
 
   it("preserves the mock's heuristic answers", async () => {
@@ -71,11 +71,11 @@ describe("suggestCategories — provider variants", () => {
       // intentionally no suggestBatch
     };
     const out = await suggestCategories([tx({}), tx({})], provider);
-    expect(out.get(0)).toBe("12");
-    expect(out.get(1)).toBe("12");
+    expect(out.get(0)).toBe("13");
+    expect(out.get(1)).toBe("13");
   });
 
-  it("falls back to category 12 when the provider throws", async () => {
+  it("falls back to category 13 when the provider throws", async () => {
     const provider: AiProvider = {
       async categorizeBatch() {
         throw new Error("kaboom");
@@ -85,8 +85,8 @@ describe("suggestCategories — provider variants", () => {
       },
     };
     const out = await suggestCategories([tx({}), tx({})], provider);
-    expect(out.get(0)).toBe("12");
-    expect(out.get(1)).toBe("12");
+    expect(out.get(0)).toBe("13");
+    expect(out.get(1)).toBe("13");
   });
 
   it("splits large inputs into batches of 10", async () => {
