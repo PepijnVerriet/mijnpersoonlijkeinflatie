@@ -14,6 +14,8 @@ import type { Transaction } from "@/lib/parsers/types";
 
 const SAVINGS_RE = /sparen\s*\/\s*beleggen/i;
 const BROKERAGE_RE = /\bflatex\b|\bcashorder\b/i;
+/** Captures the destination/source phrase at the tail of a description. */
+const TRANSFER_DIRECTION_RE = /\b(?:naar|van):\s*(.+?)\s*$/i;
 
 /** Whether a parsed transaction is a consumer expense that should be kept. */
 export function isConsumerExpense(
@@ -32,12 +34,14 @@ export function isConsumerExpense(
  * Strict `code === "tb"` gate first: per Rabobank conventions only the `tb`
  * transaction code is reserved for inter-own-account transfers, so we won't
  * mistakenly drop a real card payment to someone who happens to share the
- * account holder's name. Inside the `tb` branch we then match on either:
- *  - counterparty name == account holder (handles "Schotland", "Vrij
- *    Spaargeld" and other savings-pot labels);
- *  - or the legacy "Sparen/beleggen" description label as a belt-and-
- *    suspenders fallback (in case the counterparty name happens to be the
- *    bank-side product instead of the user).
+ * account holder's name. Inside the `tb` branch we then match on:
+ *  - counterparty name == account holder (handles incoming pocket transfers
+ *    where Rabo prints the user's own name);
+ *  - the legacy "Sparen/beleggen" description label as a belt-and-suspenders
+ *    fallback;
+ *  - the savings-pocket echo pattern "<Label> naar: <Label>" / "<Label> van:
+ *    <Label>", which is how Rabo prints outgoing transfers to a named pocket
+ *    on the user's savings account (e.g. "Schotland", "Vrij Spaargeld").
  */
 export function isOwnAccountTransfer(
   tx: Transaction,
@@ -46,7 +50,24 @@ export function isOwnAccountTransfer(
   if (tx.code !== "tb") return false;
   if (namesMatch(tx.counterpartyName, accountHolderName)) return true;
   if (SAVINGS_RE.test(tx.description)) return true;
+  if (isPocketLabelEcho(tx)) return true;
   return false;
+}
+
+/**
+ * Whether the description tail names the same party as `counterpartyName`.
+ *
+ * Outgoing Rabobank pocket transfers print as `"<IBAN> <Label> naar: <Label>"`
+ * where `<Label>` is the user-chosen savings-pocket name and is identical on
+ * both sides. The tautology is the distinguishing signal: a real third-party
+ * transfer never echoes its counterparty name in a `naar:` / `van:` suffix.
+ * Content-free (no hardcoded pocket labels), gated above by `code === "tb"`.
+ */
+function isPocketLabelEcho(tx: Transaction): boolean {
+  if (!tx.counterpartyName) return false;
+  const m = tx.description.match(TRANSFER_DIRECTION_RE);
+  if (!m) return false;
+  return namesMatch(m[1], tx.counterpartyName);
 }
 
 /**

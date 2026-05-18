@@ -377,6 +377,70 @@ describe("isConsumerExpense", () => {
       ),
     ).toBe(false);
   });
+
+  // Module 6a: outgoing pocket-label echo pattern in the description tail.
+  // Rabo prints these as "<IBAN> <Label> naar: <Label>" with the pocket name
+  // as both counterpartyName and the destination phrase.
+  it("(a) drops outgoing tb 'Schotland naar: Schotland' loopback (pocket-label echo)", () => {
+    const tx = makeTx({
+      code: "tb",
+      counterpartyIban: "NL08 RABO 3162 5742 34",
+      counterpartyName: "Schotland",
+      description: "NL08 RABO 3162 5742 34 Schotland naar: Schotland",
+    });
+    expect(isOwnAccountTransfer(tx, "P.G. Verriet")).toBe(true);
+    expect(isConsumerExpense(tx, "P.G. Verriet")).toBe(false);
+  });
+
+  it("(b) drops outgoing tb 'Vrij Spaargeld naar: Vrij Spaargeld' loopback (pocket-label echo)", () => {
+    const tx = makeTx({
+      code: "tb",
+      counterpartyIban: "NL08 RABO 3162 5742 34",
+      counterpartyName: "Vrij Spaargeld",
+      description: "NL08 RABO 3162 5742 34 Vrij Spaargeld naar: Vrij Spaargeld",
+    });
+    expect(isOwnAccountTransfer(tx, "P.G. Verriet")).toBe(true);
+    expect(isConsumerExpense(tx, "P.G. Verriet")).toBe(false);
+  });
+
+  it("(c) KEEPS a tb transfer to a third party with no name echo (real payment)", () => {
+    // A real rent payment via internetbankieren — code 'tb' but counterparty
+    // is a different person and the description has no `naar: <CP>` echo.
+    const tx = makeTx({
+      code: "tb",
+      counterpartyIban: "NL12 ABNA 0123 4567 89",
+      counterpartyName: "K. Verhuurder",
+      description: "NL12 ABNA 0123 4567 89 K. Verhuurder huur april",
+    });
+    expect(isOwnAccountTransfer(tx, "P.G. Verriet")).toBe(false);
+    expect(isConsumerExpense(tx, "P.G. Verriet")).toBe(true);
+  });
+
+  it("(d) KEEPS a non-tb (bc) payment even if description contains 'naar: <Name>'", () => {
+    // The pocket-label echo heuristic only fires inside the code === 'tb'
+    // gate, so a card payment whose description happens to read like an echo
+    // must still be treated as a consumer expense.
+    const tx = makeTx({
+      code: "bc",
+      counterpartyName: "Anna",
+      description: "Pizza terug naar: Anna",
+    });
+    expect(isOwnAccountTransfer(tx, "P.G. Verriet")).toBe(false);
+    expect(isConsumerExpense(tx, "P.G. Verriet")).toBe(true);
+  });
+
+  it("(e) KEEPS a tb transfer with a different name after 'naar:' (no false echo)", () => {
+    // counterpartyName and the destination phrase disagree, so namesMatch
+    // fails and the loopback heuristic must not fire.
+    const tx = makeTx({
+      code: "tb",
+      counterpartyIban: "NL12 ABNA 0123 4567 89",
+      counterpartyName: "Anna",
+      description: "NL12 ABNA 0123 4567 89 Anna gift naar: Bob",
+    });
+    expect(isOwnAccountTransfer(tx, "P.G. Verriet")).toBe(false);
+    expect(isConsumerExpense(tx, "P.G. Verriet")).toBe(true);
+  });
 });
 
 describe("namesMatch", () => {
