@@ -304,8 +304,8 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 6b-5: Resultaat transparantie-blok → AF, gecommit
 - Module 6b-6: tests + end-to-end walkthrough → AF, gecommit (baseline 271/0)
 - Module 6: AF, hele uitsluit-feature gedeployd
-- Pre-launch: Privacy-pagina + landing-page fix + corrections-log uitschakelen → BEZIG
-- Daarna: GitHub repo + Vercel deployment + domain hookup → NOG NIET
+- Pre-launch: Privacy-pagina + landing-page fix + corrections-log uitschakelen → AF, gecommit (baseline 275/0)
+- GitHub repo + Vercel deployment + domain hookup → BEZIG
 
 
 
