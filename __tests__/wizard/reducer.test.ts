@@ -73,4 +73,28 @@ describe("wizardReducer — TOGGLE_EXCLUSION", () => {
     });
     expect(afterProcess.excludedTransactionIds.size).toBe(0);
   });
+
+  // -------------------------------------------------------------------
+  // Module 6b-6: end-to-end state-machine flow
+  // -------------------------------------------------------------------
+
+  it("(6b-6) exclusions survive SUBMIT_CORRECTIONS_SUCCESS so 6b-4 can use them", () => {
+    // Sequence: process → toggle 2 ids → submit corrections.
+    // The submit must NOT clear the exclusion set, otherwise the calculate
+    // call right after would lose the user's choices (design from 6b-1).
+    let s: WizardState = INITIAL_STATE;
+    s = wizardReducer(s, { type: "PROCESS_SUCCESS", result: PROCESS_RESULT });
+    s = wizardReducer(s, { type: "TOGGLE_EXCLUSION", transactionId: "tx-1" });
+    s = wizardReducer(s, { type: "TOGGLE_EXCLUSION", transactionId: "tx-2" });
+    expect(s.excludedTransactionIds.size).toBe(2);
+
+    s = wizardReducer(s, {
+      type: "SUBMIT_CORRECTIONS_SUCCESS",
+      patched: PROCESS_RESULT,
+    });
+    expect(s.excludedTransactionIds.has("tx-1")).toBe(true);
+    expect(s.excludedTransactionIds.has("tx-2")).toBe(true);
+    expect(s.excludedTransactionIds.size).toBe(2);
+    expect(s.step).toBe("result");
+  });
 });

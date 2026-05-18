@@ -193,4 +193,52 @@ describe("POST /api/calculate", () => {
     const body = (await res.json()) as { error: string };
     expect(body.error).toMatch(/(Geen transacties|Te weinig data)/);
   });
+
+  // ---------------------------------------------------------------------
+  // Module 6b-6: end-to-end exclusion-flow assertions
+  // ---------------------------------------------------------------------
+
+  it("(6b-6) excluding a single transaction reports its exact amount", async () => {
+    // Build enough volume to clear DEFAULT_MIN_TRANSACTIONS = 20 after the
+    // exclusion, then drop one €123,45 row and check excludedAmount is exact.
+    const cat01 = withIds(makeBulk(21, "01", 10), "a");
+    const cat11 = withIds(makeBulk(5, "11", 123.45), "b");
+    const txs = [...cat01, ...cat11];
+    const res = await POST(
+      buildRequest({
+        transactions: txs,
+        excludedTransactionIds: ["b-0"],
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as CalculateResponse;
+    expect(body.meta.excludedCount).toBe(1);
+    expect(body.meta.excludedAmount).toBeCloseTo(123.45, 6);
+  });
+
+  it("(6b-6) excluding every transaction of a category removes it from the breakdown", async () => {
+    // 25 cat 01 × €10 + 5 cat 11 × €20 = €250 + €100 = €350.
+    // Drop the entire cat-11 subset → totalSpending €250, cat 11 gone.
+    const cat01 = withIds(makeBulk(25, "01", 10), "a");
+    const cat11 = withIds(makeBulk(5, "11", 20), "b");
+    const txs = [...cat01, ...cat11];
+    const res = await POST(
+      buildRequest({
+        transactions: txs,
+        excludedTransactionIds: cat11.map((t) => t.id),
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as CalculateResponse;
+    expect(body.calculation.totalSpending).toBeCloseTo(250, 6);
+    const cat11Entry = body.calculation.breakdown.find(
+      (b) => b.category === "11",
+    );
+    expect(cat11Entry).toBeUndefined();
+    const cat01Entry = body.calculation.breakdown.find(
+      (b) => b.category === "01",
+    );
+    expect(cat01Entry).toBeDefined();
+    expect(cat01Entry!.weight).toBeCloseTo(1, 6);
+  });
 });
