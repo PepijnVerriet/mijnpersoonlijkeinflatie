@@ -278,8 +278,8 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 6b-2: Review-scherm UI (toggle + visuele markering) → AF, gecommit
 - Module 6b-3: Correct-scherm filtering → AF, gecommit
 - Module 6b-4: calculate-route filtering → AF, gecommit (baseline 268/0)
-- Module 6b-5: Resultaat transparantie-blok → BEZIG
-- Module 6b-6 → NOG NIET
+- Module 6b-5: Resultaat transparantie-blok → AF, gecommit
+- Module 6b-6: tests + end-to-end walkthrough → BEZIG
 - Privacy-pagina → NOG NIET
 - GitHub + Vercel deployment → NOG NIET
 
