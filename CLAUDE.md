@@ -230,7 +230,9 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 4e-2 sessie B: Wizard + resultaat migratie → AF, gecommit
 - Module 5a: Categorieën definitie + coicop-mapping → AF, gecommit
 - Module 5b: CbsApiProvider implementatie → AF, gecommit
-- Module 5c: mock-rates uitbreiden naar 14 categorieën → NOG NIET
+- Module 5a: AF, gecommit
+- Module 5b: AF, gecommit
+- Module 5c: Mock-rates uitbreiden naar 14 categorieën → BEZIG
 - Module 5d-g: zie principe 33 → NOG NIET
 - Privacy-pagina → NOG NIET
 - GitHub + Vercel deployment → NOG NIET
