@@ -84,7 +84,7 @@ export default function PrivacyPage() {
             modellen te trainen.
           </p>
           <p className="m-0">
-            We cachen Claude's antwoorden lokaal op de server — alleen de
+            We cachen Claude’s antwoorden lokaal op de server — alleen de
             handelaars-naam (zonder context) als sleutel, en de categorie-code
             als waarde. Deze cache wist bij elke deploy.
           </p>
@@ -121,7 +121,7 @@ export default function PrivacyPage() {
           <p className="m-0">
             Onder de AVG heb je recht op inzage, correctie en verwijdering van
             persoonsgegevens. Omdat we niets opslaan, is er feitelijk weinig te
-            wissen. Mocht je toch vragen hebben over data die in Vercel's logs
+            wissen. Mocht je toch vragen hebben over data die in Vercel’s logs
             zou kunnen zitten: neem contact op (zie hieronder).
           </p>
         </Section>
