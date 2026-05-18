@@ -16,13 +16,16 @@ import type { KeywordRule } from "./types";
  *  - Merchant names normalised by the Rabobank parser strip PSP prefixes
  *    like "BCK*" / "CCV*", so the keyword targets the post-normalisation
  *    name (e.g. "vissers", not "bck vissers").
+ *  - Category codes follow COICOP-2018 (14 categories). Note: zorg-
+ *    verzekeraars land in 12 (Verzekeringen en financiële diensten),
+ *    niet in 06 (Gezondheid). Drogist en ziekenhuis blijven 06.
  */
 export const KEYWORDS: readonly KeywordRule[] = [
   // ===========================================================================
   // GROUP 1 — observed in real Rabobank data (Tilburg, April 2025)
   // ===========================================================================
 
-  // 01 Voedingsmiddelen en alcoholvrije dranken
+  // 01 Voeding en alcoholvrije dranken
   { keyword: "ah to go", category: "01", note: "AH To Go convenience" },
   { keyword: "albert heijn", category: "01" },
   { keyword: "ah", category: "01", note: "AH-card abbreviation; safe via word boundary" },
@@ -45,7 +48,7 @@ export const KEYWORDS: readonly KeywordRule[] = [
   { keyword: "ns zaltbommel", category: "07" },
   { keyword: "total hambake", category: "07", note: "TotalEnergies tankstation, Hambakenwetering Den Bosch" },
 
-  // 11 Restaurants en hotels
+  // 11 Restaurants en accommodaties
   { keyword: "mcdonalds", category: "11" },
   { keyword: "febo", category: "11" },
   { keyword: "cafetaria marktzicht", category: "11" },
@@ -67,16 +70,15 @@ export const KEYWORDS: readonly KeywordRule[] = [
   { keyword: "sparklesbycai", category: "03" },
   { keyword: "decathlon", category: "03", note: "Sportkleding/-artikelen, dominant kleding" },
 
-  // 08 Communicatie
+  // 08 Informatie en communicatie
   { keyword: "kpn", category: "08" },
 
   // 06 Gezondheid
-  { keyword: "vgz", category: "06" },
   { keyword: "kruidvat", category: "06", note: "Drogist; in Pepijn-data overwegend gezondheid" },
   { keyword: "stichting elisabet", category: "06", note: "Sint Elisabeth Ziekenhuis Tilburg, ziekenhuiszorg" },
   { keyword: "elisabethziekenhuis", category: "06", note: "Variant schrijfwijze ziekenhuis" },
 
-  // 09 Recreatie en cultuur
+  // 09 Recreatie, sport en cultuur
   { keyword: "netflix", category: "09" },
   { keyword: "videoland", category: "09" },
   { keyword: "pathe", category: "09", note: "Bioscoop; snackcounter telt ook als 09 voor v1" },
@@ -86,8 +88,11 @@ export const KEYWORDS: readonly KeywordRule[] = [
   { keyword: "tilburg university", category: "10" },
   { keyword: "skillsource", category: "10" },
 
-  // 12 Diverse goederen en diensten
-  { keyword: "frans hommersom", category: "12", note: "Kapper" },
+  // 12 Verzekeringen en financiële diensten
+  { keyword: "vgz", category: "12", note: "Zorgverzekeraar; premie valt onder COICOP-2018 12" },
+
+  // 13 Diverse goederen en diensten
+  { keyword: "frans hommersom", category: "13", note: "Kapper" },
 
   // ===========================================================================
   // GROUP 2 — large NL retailers / service providers (national coverage)
@@ -103,41 +108,52 @@ export const KEYWORDS: readonly KeywordRule[] = [
   // 03 Kleding
   { keyword: "zalando", category: "03" },
 
-  // 05 Stoffering, huishoudelijke artikelen en gereedschap
+  // 05 Huishoudelijke goederen en diensten
   { keyword: "gamma", category: "05" },
   { keyword: "praxis", category: "05" },
   { keyword: "karwei", category: "05" },
   { keyword: "ikea", category: "05" },
 
-  // 06 Gezondheid (zorgverzekeraars)
-  { keyword: "cz", category: "06", note: "Zorgverzekeraar" },
-  { keyword: "zilveren kruis", category: "06" },
-  { keyword: "menzis", category: "06" },
-  { keyword: "unive", category: "06", note: "Univé; diakriet-fold maakt match veilig" },
-
   // 07 Vervoer
   { keyword: "esso", category: "07" },
   { keyword: "texaco", category: "07" },
   { keyword: "tango", category: "07" },
-  { keyword: "anwb", category: "07" },
+  { keyword: "anwb", category: "07", note: "Wegenwacht dominant; verzekering-tak niet onderscheidbaar in transactie-data" },
   { keyword: "ns internationaal", category: "07" },
   { keyword: "gvb", category: "07" },
   { keyword: "ret", category: "07", note: "Rotterdamse vervoer; veilig via word boundary" },
 
-  // 08 Communicatie
+  // 08 Informatie en communicatie
   { keyword: "t-mobile", category: "08" },
   { keyword: "vodafone", category: "08" },
   { keyword: "ziggo", category: "08" },
 
-  // 09 Recreatie en cultuur (electronica = AV/IT-apparatuur valt onder 09)
-  { keyword: "mediamarkt", category: "09" },
-  { keyword: "coolblue", category: "09" },
+  // 09 Recreatie, sport en cultuur (electronica = AV/IT-apparatuur)
+  { keyword: "mediamarkt", category: "09", note: "COICOP-2018 splitst IT (08) en AV (09); winkelnaam zegt niets over product, bewuste vereenvoudiging" },
+  { keyword: "coolblue", category: "09", note: "Zelfde overweging als mediamarkt" },
   { keyword: "biblioth", category: "09", note: "Openbare bibliotheek (COICOP recreatie/cultuur). Matcht ook afkortingen Biblioth.M.Brabant" },
 
-  // 12 Diverse goederen en diensten
-  { keyword: "hema", category: "12" },
-  { keyword: "action", category: "12" },
-  { keyword: "etos", category: "12", note: "Drogist; cosmetica/persoonlijke verzorging → 12" },
-  { keyword: "bol.com", category: "12", note: "Brede webshop, voornamelijk divers" },
-  { keyword: "wehkamp", category: "12" },
+  // 12 Verzekeringen en financiële diensten
+  { keyword: "centraal beheer", category: "12", note: "Verzekeraar (auto/woon)" },
+  { keyword: "nationale nederlanden", category: "12", note: "Verzekeraar/pensioen" },
+  { keyword: "zilveren kruis", category: "12", note: "Zorgverzekeraar" },
+  { keyword: "kosten betalingsverkeer", category: "12", note: "Bankkosten Rabobank-regelaanduiding" },
+  { keyword: "servicepakket", category: "12", note: "Generieke bankkosten-rubriek" },
+  { keyword: "cz", category: "12", note: "Zorgverzekeraar" },
+  { keyword: "menzis", category: "12", note: "Zorgverzekeraar" },
+  { keyword: "unive", category: "12", note: "Univé verzekeraar (zorg + woon/auto); diakriet-fold maakt match veilig" },
+  { keyword: "aegon", category: "12", note: "Verzekeraar/financieel" },
+  { keyword: "achmea", category: "12", note: "Verzekeraar-holding" },
+  { keyword: "interpolis", category: "12", note: "Schade/zorgverzekeraar (Rabobank-stal)" },
+  { keyword: "fbto", category: "12", note: "Zorg/schadeverzekeraar" },
+  { keyword: "dela", category: "12", note: "Uitvaartverzekering" },
+  { keyword: "ohra", category: "12", note: "Zorgverzekeraar" },
+  { keyword: "ditzo", category: "12", note: "Schadeverzekeraar" },
+
+  // 13 Diverse goederen en diensten
+  { keyword: "hema", category: "13" },
+  { keyword: "action", category: "13" },
+  { keyword: "etos", category: "13", note: "Drogist; cosmetica/persoonlijke verzorging → 13" },
+  { keyword: "bol.com", category: "13", note: "Brede webshop, voornamelijk divers" },
+  { keyword: "wehkamp", category: "13" },
 ];

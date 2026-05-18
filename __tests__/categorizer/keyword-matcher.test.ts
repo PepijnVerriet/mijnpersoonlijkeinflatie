@@ -53,7 +53,7 @@ describe("matchKeyword — happy paths from the spec", () => {
     ["NETFLIX INTERNATIONAL B.V.", "09", "netflix"],
     ["TILBURG UNIVERSITY", "10", "tilburg university"],
     ["KPN B.V.", "08", "kpn"],
-    ["VGZ Zorgverzekeraar N.V.", "06", "vgz"],
+    ["VGZ Zorgverzekeraar N.V.", "12", "vgz"],
   ])("classifies %j as category %s via keyword %j", (desc, category, kw) => {
     const result = matchKeyword(tx({ description: desc }), KEYWORDS);
     expect(result.category).toBe(category);
@@ -111,7 +111,7 @@ describe("matchKeyword — word boundaries and diacritics", () => {
   });
 
   it("matches 'Univé' to keyword 'unive' (diacritic-folded)", () => {
-    expect(matchKeyword(tx({ description: "UNIVÉ ZORG" }), KEYWORDS).category).toBe("06");
+    expect(matchKeyword(tx({ description: "UNIVÉ ZORG" }), KEYWORDS).category).toBe("12");
   });
 
   it("respects specific-before-generic ordering ('ah to go' before 'ah')", () => {
