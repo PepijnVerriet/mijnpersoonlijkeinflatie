@@ -30,3 +30,11 @@ if (existsSync(ENV_PATH)) {
     }
   }
 }
+
+// CBS-tests draaien standaard tegen de deterministische mock-provider.
+// .env.local zet CBS_PROVIDER=live voor productie; tests moeten dat
+// negeren om geen live API-calls te doen tijdens npm test.
+// Voor opt-in live testen: ENABLE_LIVE_CBS_TESTS=1 in shell-env.
+if (!process.env.ENABLE_LIVE_CBS_TESTS) {
+  delete process.env.CBS_PROVIDER;
+}
