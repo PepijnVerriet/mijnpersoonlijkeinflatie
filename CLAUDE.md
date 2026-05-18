@@ -265,6 +265,8 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - v2 optimalisatie: negative cache binnen calculate-scope om 13× 
   fallback-latency bij CBS-storing te voorkomen. Nu wordt bij elke 
   categorie binnen één request opnieuw geprobeerd live te halen.
+- v2: Foutmelding bij berekening met nul rates (bijv. ontbrekende 
+  mock-maand). Nu valt het stil terug op 0,00%.
 - Voor module 4c: iDEAL-transacties tussen vrienden via Rabo Betaalverzoek 
   hebben geen merchant, alleen een omschrijving (bijv. "Sloffen", 
   "Stadscafe"). Categorizer moet voor code "id" en "bv" terugvallen op 
