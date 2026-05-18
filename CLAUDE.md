@@ -219,6 +219,19 @@ Modulair opgebouwd in losse, onafhankelijke modules:
 36. Module 6a-1 fixt 3 pre-existing failures die ontstaan zijn 
     tijdens module 5b/5f door semantiek-wijzigingen (live CBS, 
     fallback, usingMockData detectie). Tests bleven op oud gedrag.
+37. Module 6b uitsluit-feature gefaseerd:
+    - 6b-1: state-management (excludedTransactionIds Set in wizard)
+    - 6b-2: Review-scherm UI (toggle + visuele markering)
+    - 6b-3: Correct-scherm filtering
+    - 6b-4: calculate-route filtering
+    - 6b-5: Resultaat transparantie-blok
+    - 6b-6: tests + walkthrough
+    
+    UX-keuzes:
+    - Toggle per rij, klik = uit, klik weer = in
+    - Visueel markeren met doorgestreept/grijs (transactie blijft zichtbaar)
+    - Alleen op Review-scherm (Correct toont uitgesloten niet meer)
+    - Transparantie-blok op Resultaat toont aantal + euro uitgesloten
 
 \## Werkstroom
 
@@ -261,7 +274,8 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 5g: End-to-end test → OVERGESLAGEN (vervangen door issue 2 tests)
 - Module 6a: Parser-filter fix → AF, gecommit
 - Module 6a-1: Test-baseline herstellen → AF, gecommit (3 commits, baseline 259/0)
-- Module 6b: Uitsluit-feature → NOG NIET
+- Module 6b-1: Uitsluit-feature state-management → BEZIG
+- Module 6b-2 t/m 6b-6 → NOG NIET
 - Privacy-pagina → NOG NIET
 - GitHub + Vercel deployment → NOG NIET
 
