@@ -207,6 +207,15 @@ Modulair opgebouwd in losse, onafhankelijke modules:
     - Restcategorie (kapper, stomerij): naar 13 Diversen
     - ANWB: blijft op 07 (wegenwacht dominant)
     - MediaMarkt, Coolblue: blijven op 09 (transactie-data toont alleen winkelnaam)
+35. Module 6 is opgesplitst:
+    - 6a: Filter-bug fix voor maart 2026 PDF (Schotland/Vrij Spaargeld 
+      glippen alsnog door, vermoedelijk verschil in PDF-structuur t.o.v. 
+      april 2025)
+    - 6b: Uitsluit-feature op Review-scherm
+      - Toggle per rij (klik = uit, klik weer = in)
+      - Visueel markeren (doorgestreept of grijs)
+      - Uitgesloten transacties: niet in Correct, niet in calculate
+      - Transparantie-blok op Resultaat toont aantal + euro uitgesloten
 
 \## Werkstroom
 
@@ -246,7 +255,9 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 5d: Keywords herwerken → AF, gecommit (coverage 77% → 79,8%)
 - Module 5e: AI-prompts updaten + cache reset → AF, gecommit
 - Module 5f: CbsFallbackBanner → AF, gecommit
-- Module 5g: End-to-end test → BEZIG
+- Module 5g: End-to-end test → OVERGESLAGEN (vervangen door issue 2 tests)
+- Module 6a: Parser-filter bug-fix maart 2026 PDF → BEZIG
+- Module 6b: Uitsluit-feature → NOG NIET
 - Privacy-pagina → NOG NIET
 - GitHub + Vercel deployment → NOG NIET
 
