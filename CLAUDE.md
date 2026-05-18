@@ -274,8 +274,9 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 5g: End-to-end test → OVERGESLAGEN (vervangen door issue 2 tests)
 - Module 6a: Parser-filter fix → AF, gecommit
 - Module 6a-1: Test-baseline herstellen → AF, gecommit (3 commits, baseline 259/0)
-- Module 6b-1: Uitsluit-feature state-management → BEZIG
-- Module 6b-2 t/m 6b-6 → NOG NIET
+- Module 6b-1: Uitsluit-feature state-management → AF, gecommit (baseline 263/0)
+- Module 6b-2: Review-scherm UI (toggle + visuele markering) → BEZIG
+- Module 6b-3 t/m 6b-6 → NOG NIET
 - Privacy-pagina → NOG NIET
 - GitHub + Vercel deployment → NOG NIET
 
