@@ -160,7 +160,11 @@ export function Wizard() {
     // processResult must exist by the time we get here (the predicate checks it).
     const result = state.processResult!;
 
-    const unknowns = result.transactions.filter((t) => t.category === null);
+    // Skip excluded transactions: no cost spent on AI suggestions for rows
+    // the user already chose to leave out of the calculation (module 6b-3).
+    const unknowns = result.transactions.filter(
+      (t) => t.category === null && !state.excludedTransactionIds.has(t.id),
+    );
     if (unknowns.length === 0) {
       dispatch({
         type: "LOAD_SUGGESTIONS_SUCCESS",
@@ -196,7 +200,12 @@ export function Wizard() {
     return () => {
       cancelled = true;
     };
-  }, [state.step, state.suggestions, state.processResult]);
+  }, [
+    state.step,
+    state.suggestions,
+    state.processResult,
+    state.excludedTransactionIds,
+  ]);
 
   /**
    * Auto-run the inflation calculation when entering the result step.
@@ -337,6 +346,7 @@ export function Wizard() {
       {state.step === "correct" && state.processResult && (
         <StepCorrect
           result={state.processResult}
+          excludedTransactionIds={state.excludedTransactionIds}
           suggestionsLoading={state.suggestionsLoading}
           suggestionsFallback={state.suggestionsFallback}
           userCategories={state.userCategories}

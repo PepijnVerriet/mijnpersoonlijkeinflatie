@@ -9,6 +9,8 @@ import { Spinner } from "./Spinner";
 
 interface StepCorrectProps {
   result: ProcessResult;
+  /** IDs the user has excluded on Review; we skip them here entirely. */
+  excludedTransactionIds: ReadonlySet<string>;
   suggestionsLoading: boolean;
   suggestionsFallback: boolean;
   userCategories: Record<string, CategoryCode>;
@@ -32,12 +34,18 @@ function fmtAmount(n: number): string {
   });
 }
 
-function unknownTransactions(result: ProcessResult): ProcessTransaction[] {
-  return result.transactions.filter((t) => t.category === null);
+function unknownTransactions(
+  result: ProcessResult,
+  excludedTransactionIds: ReadonlySet<string>,
+): ProcessTransaction[] {
+  return result.transactions.filter(
+    (t) => t.category === null && !excludedTransactionIds.has(t.id),
+  );
 }
 
 export function StepCorrect({
   result,
+  excludedTransactionIds,
   suggestionsLoading,
   suggestionsFallback,
   userCategories,
@@ -46,7 +54,7 @@ export function StepCorrect({
   onBack,
   onSubmit,
 }: StepCorrectProps) {
-  const unknowns = unknownTransactions(result);
+  const unknowns = unknownTransactions(result, excludedTransactionIds);
   const totalCount = result.transactionCount;
   const unknownSpending = unknowns.reduce((s, t) => s + t.amount, 0);
   const totalSpending = result.transactions.reduce((s, t) => s + t.amount, 0);

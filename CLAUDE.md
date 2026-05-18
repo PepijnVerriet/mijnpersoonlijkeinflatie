@@ -304,6 +304,9 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
   onmogelijke maanden zoals "2099-12". Zou een CbsDataNotAvailableError 
   moeten throwen zodat de route consistent 404 retourneert. Latent bug, 
   niet kritiek voor v1.
+- v2: Re-fetch AI-suggesties wanneer gebruiker een eerder uitgesloten 
+  transactie weer activeert (gaat na Review/Correct retour-toggle). Nu 
+  valt zo'n transactie terug op fallback-categorie 13 in dropdown.
 - v2: Foutmelding bij berekening met nul rates (bijv. ontbrekende 
   mock-maand). Nu valt het stil terug op 0,00%.
 - Voor module 4c: iDEAL-transacties tussen vrienden via Rabo Betaalverzoek 

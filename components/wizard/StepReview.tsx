@@ -75,6 +75,12 @@ export function StepReview({
   const excludedEur = result.transactions
     .filter((t) => excludedTransactionIds.has(t.id))
     .reduce((s, t) => s + t.amount, 0);
+  // Unknowns nog te corrigeren = unknowns minus uitgesloten. Drijft de
+  // tekst op de "Door" knop zodat hij overeenkomt met wat StepCorrect
+  // straks toont (module 6b-3).
+  const remainingUnknown = result.transactions.filter(
+    (t) => t.category === null && !excludedTransactionIds.has(t.id),
+  ).length;
 
   const kpis: Array<{ label: string; value: string; sub: string; warn?: boolean }> = [
     { label: "Transacties", value: total.toString(), sub: "in dit afschrift" },
@@ -250,8 +256,10 @@ export function StepReview({
           <ArrowIcon size={14} dir="left" /> Vorige
         </Button>
         <Button variant="primary" onClick={onNext}>
-          {unknown > 0
-            ? `Categoriseer ${unknown} transactie${unknown === 1 ? "" : "s"}`
+          {remainingUnknown > 0
+            ? `Categoriseer ${remainingUnknown} transactie${
+                remainingUnknown === 1 ? "" : "s"
+              }`
             : "Door naar resultaat"}{" "}
           <ArrowIcon size={14} />
         </Button>
