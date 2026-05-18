@@ -37,6 +37,8 @@ export function wizardReducer(
         suggestions: null,
         userCategories: {},
         suggestionsFallback: false,
+        // Stale transaction IDs no longer refer to any row in the new upload.
+        excludedTransactionIds: new Set(),
       };
 
     case "PROCESS_ERROR":
@@ -117,7 +119,24 @@ export function wizardReducer(
     case "CALCULATE_INFLATION_ERROR":
       return { ...state, calculating: false, error: action.message };
 
+    case "TOGGLE_EXCLUSION": {
+      // Always allocate a fresh Set so React detects the state change; the
+      // existing reference would compare equal even after mutation.
+      const next = new Set(state.excludedTransactionIds);
+      if (next.has(action.transactionId)) {
+        next.delete(action.transactionId);
+      } else {
+        next.add(action.transactionId);
+      }
+      return { ...state, excludedTransactionIds: next };
+    }
+
     case "RESET":
-      return { ...INITIAL_STATE };
+      return {
+        ...INITIAL_STATE,
+        // INITIAL_STATE.excludedTransactionIds is a shared module-level Set;
+        // allocate a fresh one so two resets don't leak state into each other.
+        excludedTransactionIds: new Set(),
+      };
   }
 }

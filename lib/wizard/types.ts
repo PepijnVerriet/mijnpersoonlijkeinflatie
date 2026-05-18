@@ -75,6 +75,15 @@ export interface WizardState {
   inflationCalculation: InflationCalculation | null;
   /** Metadata around the inflation calculation (mock-data flag, timestamp). */
   inflationMeta: InflationMeta | null;
+
+  // -- Exclusion (module 6b) state -------------------------------------------
+  /**
+   * IDs of transactions the user has excluded on the Review screen (6b-2).
+   * Excluded transactions are dropped before correction (6b-3) and before
+   * calculation (6b-4), and surfaced in the result transparency block (6b-5).
+   * Set rather than array so toggling is O(1) and order-independent.
+   */
+  excludedTransactionIds: Set<string>;
 }
 
 /** Actions accepted by the reducer (see `lib/wizard/reducer.ts`). */
@@ -110,6 +119,7 @@ export type WizardAction =
       meta: InflationMeta;
     }
   | { type: "CALCULATE_INFLATION_ERROR"; message: string }
+  | { type: "TOGGLE_EXCLUSION"; transactionId: string }
   | { type: "RESET" };
 
 /** Initial state of a brand-new wizard session. */
@@ -128,4 +138,5 @@ export const INITIAL_STATE: WizardState = {
   calculating: false,
   inflationCalculation: null,
   inflationMeta: null,
+  excludedTransactionIds: new Set<string>(),
 };
