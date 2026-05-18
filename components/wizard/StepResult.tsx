@@ -310,6 +310,16 @@ export function StepResult({
                 </>
               )}
             </p>
+            {meta.excludedCount > 0 && (
+              <p className="m-0">
+                Je hebt zelf{" "}
+                <strong>
+                  {meta.excludedCount}{" "}
+                  {meta.excludedCount === 1 ? "transactie" : "transacties"}
+                </strong>{" "}
+                uitgesloten (<strong>{fmtAmount(meta.excludedAmount)}</strong>).
+              </p>
+            )}
             {calculation.categoriesWithoutCbsData.length > 0 && (
               <p className="m-0 text-ink-3">
                 Daarnaast hadden{" "}
