@@ -233,6 +233,16 @@ Modulair opgebouwd in losse, onafhankelijke modules:
     - Alleen op Review-scherm (Correct toont uitgesloten niet meer)
     - Transparantie-blok op Resultaat toont aantal + euro uitgesloten
 
+    Handmatige walkthrough (na wijzigingen aan 6b-codepaden):
+    - A. Refresh `/check`, upload, op Review sluit 3 transacties uit
+    - B. Counter op "Categoriseer N…" zakt met 3; doorklikken naar 
+      Correct — uitgesloten transacties zijn weg uit de lijst
+    - C. Door naar Resultaat — transparantie-blok toont 
+      "Je hebt zelf 3 transacties uitgesloten (€X)"
+    - D. Terug-knop naar Review → uitsluitingen blijven gemarkeerd
+    - E. Sluit ALLE transacties uit → Resultaat-scherm toont 422 error, 
+      terug-knop herstelt
+
 \## Werkstroom
 
 
@@ -279,7 +289,8 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 6b-3: Correct-scherm filtering → AF, gecommit
 - Module 6b-4: calculate-route filtering → AF, gecommit (baseline 268/0)
 - Module 6b-5: Resultaat transparantie-blok → AF, gecommit
-- Module 6b-6: tests + end-to-end walkthrough → BEZIG
+- Module 6b-6: tests + end-to-end walkthrough → AF, gecommit (baseline 271/0)
+- Module 6b uitsluit-feature → KLAAR (6 fasen + 1 test-baseline herstel)
 - Privacy-pagina → NOG NIET
 - GitHub + Vercel deployment → NOG NIET
 
