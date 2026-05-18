@@ -260,7 +260,7 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 5f: CbsFallbackBanner → AF, gecommit
 - Module 5g: End-to-end test → OVERGESLAGEN (vervangen door issue 2 tests)
 - Module 6a: Parser-filter fix → AF, gecommit
-- Module 6a-1: Test-baseline herstellen (3 failures door 5b/5f) → BEZIG
+- Module 6a-1: Test-baseline herstellen → AF, gecommit (3 commits, baseline 259/0)
 - Module 6b: Uitsluit-feature → NOG NIET
 - Privacy-pagina → NOG NIET
 - GitHub + Vercel deployment → NOG NIET
@@ -280,6 +280,14 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - v2 optimalisatie: negative cache binnen calculate-scope om 13× 
   fallback-latency bij CBS-storing te voorkomen. Nu wordt bij elke 
   categorie binnen één request opnieuw geprobeerd live te halen.
+- v2: setup-env.ts gebruikt nu per-key delete voor CBS_PROVIDER. 
+  Refactoren naar brede whitelist (alleen ANTHROPIC_API_KEY + expliciete 
+  ENABLE_LIVE_*_TESTS vlaggen doorlaten) is defensiever tegen toekomstige 
+  env-leaks van .env.local naar test-runs.
+- v2: cbsApiProvider.getMonthlyRates retourneert {} (geen error) voor 
+  onmogelijke maanden zoals "2099-12". Zou een CbsDataNotAvailableError 
+  moeten throwen zodat de route consistent 404 retourneert. Latent bug, 
+  niet kritiek voor v1.
 - v2: Foutmelding bij berekening met nul rates (bijv. ontbrekende 
   mock-maand). Nu valt het stil terug op 0,00%.
 - Voor module 4c: iDEAL-transacties tussen vrienden via Rabo Betaalverzoek 
