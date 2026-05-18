@@ -216,6 +216,9 @@ Modulair opgebouwd in losse, onafhankelijke modules:
       - Visueel markeren (doorgestreept of grijs)
       - Uitgesloten transacties: niet in Correct, niet in calculate
       - Transparantie-blok op Resultaat toont aantal + euro uitgesloten
+36. Module 6a-1 fixt 3 pre-existing failures die ontstaan zijn 
+    tijdens module 5b/5f door semantiek-wijzigingen (live CBS, 
+    fallback, usingMockData detectie). Tests bleven op oud gedrag.
 
 \## Werkstroom
 
@@ -256,7 +259,8 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 5e: AI-prompts updaten + cache reset → AF, gecommit
 - Module 5f: CbsFallbackBanner → AF, gecommit
 - Module 5g: End-to-end test → OVERGESLAGEN (vervangen door issue 2 tests)
-- Module 6a: Parser-filter bug-fix maart 2026 PDF → BEZIG
+- Module 6a: Parser-filter fix → AF, gecommit
+- Module 6a-1: Test-baseline herstellen (3 failures door 5b/5f) → BEZIG
 - Module 6b: Uitsluit-feature → NOG NIET
 - Privacy-pagina → NOG NIET
 - GitHub + Vercel deployment → NOG NIET
