@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { getCbsProvider } from "@/lib/cbs";
+import { USER_FACING_CATEGORY_CODES } from "@/lib/cbs/categories";
 import { isValidMonth } from "@/lib/cbs/mock-provider";
 import { CbsDataNotAvailableError } from "@/lib/cbs/types";
 
 const CACHE_HEADER = "public, max-age=86400";
+const USER_FACING_SET: ReadonlySet<string> = new Set(USER_FACING_CATEGORY_CODES);
 
 export async function GET(req: Request): Promise<Response> {
   const { searchParams } = new URL(req.url);
@@ -19,8 +21,15 @@ export async function GET(req: Request): Promise<Response> {
   try {
     const cbs = getCbsProvider();
     const rates = await cbs.provider.getMonthlyRates(month);
+    // Filter system-only codes (CLAUDE.md §32): "14" Belastingen wordt in de
+    // parser uitgefilterd en hoort niet in UI-breakdowns of dropdowns. Mock
+    // levert codes 01-14, live CBS API levert 01-13; deze filter trekt beide
+    // recht naar een consistente user-facing shape.
+    const filteredRates = Object.fromEntries(
+      Object.entries(rates).filter(([code]) => USER_FACING_SET.has(code)),
+    );
     return NextResponse.json(
-      { month, rates },
+      { month, rates: filteredRates },
       { status: 200, headers: { "Cache-Control": CACHE_HEADER } },
     );
   } catch (err) {
