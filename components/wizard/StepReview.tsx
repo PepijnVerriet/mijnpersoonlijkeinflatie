@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { ArrowIcon, SparkIcon, WarnIcon } from "@/components/ui/icons";
+import { ArrowIcon, SparkIcon, WarnIcon, XIcon } from "@/components/ui/icons";
 import { getCategory } from "@/lib/cbs/categories";
 import type { ProcessResult, ProcessTransaction } from "@/lib/wizard/types";
 
@@ -10,6 +10,10 @@ type CategorySource = ProcessTransaction["categorySource"];
 
 interface StepReviewProps {
   result: ProcessResult;
+  /** IDs the user has toggled off; passed in from the wizard reducer. */
+  excludedTransactionIds: ReadonlySet<string>;
+  /** Dispatcher that flips a transaction's exclusion state. */
+  onToggleExclusion: (transactionId: string) => void;
   onBack: () => void;
   onNext: () => void;
 }
@@ -49,7 +53,13 @@ function sourceBadge(source: CategorySource | null) {
   return <Badge tone="warn">controleer</Badge>;
 }
 
-export function StepReview({ result, onBack, onNext }: StepReviewProps) {
+export function StepReview({
+  result,
+  excludedTransactionIds,
+  onToggleExclusion,
+  onBack,
+  onNext,
+}: StepReviewProps) {
   const total = result.transactionCount;
   const categorised = result.categorizedCount;
   const unknown = result.unknownCount;
@@ -60,6 +70,11 @@ export function StepReview({ result, onBack, onNext }: StepReviewProps) {
   const coveragePct = total > 0 ? ((categorised / total) * 100).toFixed(0) : "0";
   const unknownEurPct =
     totalEur > 0 ? ((unknownEur / totalEur) * 100).toFixed(1) : "0,0";
+
+  const excludedCount = excludedTransactionIds.size;
+  const excludedEur = result.transactions
+    .filter((t) => excludedTransactionIds.has(t.id))
+    .reduce((s, t) => s + t.amount, 0);
 
   const kpis: Array<{ label: string; value: string; sub: string; warn?: boolean }> = [
     { label: "Transacties", value: total.toString(), sub: "in dit afschrift" },
@@ -119,6 +134,21 @@ export function StepReview({ result, onBack, onNext }: StepReviewProps) {
         ))}
       </div>
 
+      {excludedCount > 0 && (
+        <div className="mt-3 flex items-center gap-2 text-[12.5px] text-ink-3">
+          <XIcon size={11} />
+          <span>
+            <strong className="font-medium text-ink-2">{excludedCount}</strong>{" "}
+            {excludedCount === 1 ? "transactie" : "transacties"} uitgesloten
+            <span className="mx-1.5 text-ink-4">·</span>
+            <strong className="font-medium tabular-nums text-ink-2">
+              {fmtAmount(excludedEur)}
+            </strong>{" "}
+            niet meegenomen
+          </span>
+        </div>
+      )}
+
       <div className="mt-8 overflow-x-auto rounded-token border border-border bg-surface">
         <table className="w-full min-w-[640px] border-collapse text-[13.5px]">
           <thead>
@@ -138,11 +168,16 @@ export function StepReview({ result, onBack, onNext }: StepReviewProps) {
               <th className="px-4 py-3 text-right text-[11.5px] font-medium uppercase tracking-[0.04em] text-ink-3">
                 Bedrag
               </th>
+              <th className="w-[52px] px-2 py-3" aria-label="Uitsluiten" />
             </tr>
           </thead>
           <tbody>
             {result.transactions.map((t) => {
               const unk = t.category === null;
+              const excluded = excludedTransactionIds.has(t.id);
+              // Tekstcellen dimmen zodra de rij is uitgesloten; de actiecel
+              // blijft volledig opaak zodat de toggle goed klikbaar blijft.
+              const dim = excluded ? "opacity-50 line-through" : "";
               return (
                 <tr
                   key={t.id}
@@ -150,13 +185,15 @@ export function StepReview({ result, onBack, onNext }: StepReviewProps) {
                     unk ? "bg-warn-soft/60" : ""
                   }`}
                 >
-                  <td className="px-4 py-3 font-mono text-[12px] text-ink-3">
+                  <td className={`px-4 py-3 font-mono text-[12px] text-ink-3 ${dim}`}>
                     {fmtDate(t.date)}
                   </td>
-                  <td className="max-w-[260px] truncate px-4 py-3 font-medium text-ink-1">
+                  <td
+                    className={`max-w-[260px] truncate px-4 py-3 font-medium text-ink-1 ${dim}`}
+                  >
                     {t.merchant ?? t.description.slice(0, 60)}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className={`px-4 py-3 ${dim}`}>
                     <span
                       className={`inline-flex items-center gap-1.5 text-[12.5px] ${
                         unk ? "italic text-warn" : "text-ink-2"
@@ -169,9 +206,37 @@ export function StepReview({ result, onBack, onNext }: StepReviewProps) {
                       )}
                     </span>
                   </td>
-                  <td className="px-4 py-3">{sourceBadge(t.categorySource)}</td>
-                  <td className="px-4 py-3 text-right font-mono text-[13px] tabular-nums text-ink-1">
+                  <td className={`px-4 py-3 ${dim}`}>
+                    {sourceBadge(t.categorySource)}
+                  </td>
+                  <td
+                    className={`px-4 py-3 text-right font-mono text-[13px] tabular-nums text-ink-1 ${dim}`}
+                  >
                     {fmtAmount(t.amount)}
+                  </td>
+                  <td className="px-2 py-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => onToggleExclusion(t.id)}
+                      title={
+                        excluded
+                          ? "Toon weer in berekening"
+                          : "Sluit uit van berekening"
+                      }
+                      aria-label={
+                        excluded
+                          ? "Toon weer in berekening"
+                          : "Sluit uit van berekening"
+                      }
+                      aria-pressed={excluded}
+                      className={`grid h-7 w-7 place-items-center rounded-md transition-colors ${
+                        excluded
+                          ? "bg-surface-2 text-ink-1"
+                          : "text-ink-3 hover:bg-surface-2 hover:text-ink-1"
+                      }`}
+                    >
+                      <XIcon size={12} />
+                    </button>
                   </td>
                 </tr>
               );

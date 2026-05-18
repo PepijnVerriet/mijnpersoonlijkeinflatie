@@ -325,6 +325,10 @@ export function Wizard() {
       {state.step === "review" && state.processResult && (
         <StepReview
           result={state.processResult}
+          excludedTransactionIds={state.excludedTransactionIds}
+          onToggleExclusion={(transactionId) =>
+            dispatch({ type: "TOGGLE_EXCLUSION", transactionId })
+          }
           onBack={() => dispatch({ type: "GO_TO_STEP", step: "upload" })}
           onNext={() => dispatch({ type: "GO_TO_STEP", step: "correct" })}
         />
