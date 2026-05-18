@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mijn Persoonlijke Inflatie
 
-## Getting Started
+Web-app waarmee je je persoonlijke inflatie berekent op basis van je eigen
+bankafschriften en CBS-cijfers. Je upload één tot twaalf maanden Rabobank-
+afschriften (PDF), de app categoriseert je uitgaven volgens CBS COICOP-2018,
+en koppelt elk uitgavenpatroon aan de bijbehorende CBS-jaarmutatie. Het
+resultaat: één getal dat zegt hoeveel duurder jóuw mandje is geworden,
+niet het gemiddelde Nederlandse mandje.
 
-First, run the development server:
+**Status:** v1 in launch. Eerste publieke versie. Alleen Rabobank-PDF.
+
+**Live:** _(URL volgt na Vercel-deployment)_
+
+## Tech stack
+
+- **Next.js 14** (App Router) + TypeScript
+- **Anthropic Claude Haiku** voor AI-fallback bij categorisatie
+- **CBS Open Data** (tabel 86141NED, COICOP-2018) voor inflatiecijfers
+- **Recharts** voor de breakdown-visualisatie
+- **Vitest** voor tests
+- **Vercel** voor hosting
+
+## Aan de slag
 
 ```bash
+npm install
+cp .env.local.example .env.local   # vul ANTHROPIC_API_KEY in als je live AI wilt
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in je browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Zonder ANTHROPIC_API_KEY werkt de app prima — de AI-fallback valt dan
+terug op een deterministische mock-provider. Voor productie-achtige
+categorisatie zet je `AI_PROVIDER=anthropic` plus een echte key.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+- `npm run dev` — dev-server met hot reload
+- `npm run build` — productie-build
+- `npm run start` — productie-build serveren
+- `npm run lint` — ESLint
+- `npm test` — Vitest watch-mode
+- `npm run test:run` — Vitest één keer
+- `npm run coverage` — coverage-rapport
 
-To learn more about Next.js, take a look at the following resources:
+## Privacy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Deze app slaat niets op. Geen database, geen cookies, geen analytics.
+Bankafschriften worden in-memory verwerkt en daarna weggegooid. Lees de
+volledige uitleg op [/privacy](./app/privacy/page.tsx).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Architectuur
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Modulair opgebouwd: bank-parsers in `lib/parsers/`, categorizer in
+`lib/categorizer/`, CBS-koppeling in `lib/cbs/`, inflatieberekening in
+`lib/inflation/`. Zie [`CLAUDE.md`](./CLAUDE.md) voor de volledige
+architectuurprincipes.

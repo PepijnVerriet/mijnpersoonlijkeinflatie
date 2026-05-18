@@ -40,6 +40,7 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
 
 # vercel
 .vercel
@@ -50,3 +51,6 @@ next-env.d.ts
 
 # design reference (visual reference only, not production code)
 design-reference/
+
+# ad-hoc debug / verify scripts (not maintained, dev-only tooling)
+/scripts/
