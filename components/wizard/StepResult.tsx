@@ -9,6 +9,7 @@ import type { InflationCalculation } from "@/lib/inflation/types";
 import type { InflationMeta, ProcessResult } from "@/lib/wizard/types";
 import { BreakdownBars } from "./result/BreakdownBars";
 import { BreakdownTable } from "./result/BreakdownTable";
+import { CbsFallbackBanner } from "./result/CbsFallbackBanner";
 import { ComparisonBars } from "./result/ComparisonBars";
 import { HeroNumber } from "./result/HeroNumber";
 import { Spinner } from "./Spinner";
@@ -208,6 +209,8 @@ export function StepResult({
           </div>
         </div>
       </section>
+
+      {meta.usingMockData && <CbsFallbackBanner />}
 
       {/* =============== BREAKDOWN BARS =============== */}
       <section className="mx-auto max-w-[1180px] px-[22px] pb-2 pt-4 md:px-12 md:pb-6 md:pt-8">
