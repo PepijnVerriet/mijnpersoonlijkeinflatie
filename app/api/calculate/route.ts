@@ -28,6 +28,14 @@ export interface CalculateMeta {
   usingMockData: boolean;
   /** ISO timestamp of when the server computed the result. */
   calculatedAt: string;
+  /**
+   * How many of the submitted transactions were skipped via
+   * `excludedTransactionIds`. Only counts IDs that actually matched a
+   * row in `transactions`; phantom IDs are ignored.
+   */
+  excludedCount: number;
+  /** Sum (in euro) of the amounts of the excluded transactions. */
+  excludedAmount: number;
 }
 
 export interface CalculateResponse {
@@ -89,9 +97,21 @@ export async function POST(req: Request): Promise<Response> {
     }
   }
 
-  const categorizationResults = toCategorizationResults(
-    txs as CalculateRequestTransaction[],
-  );
+  // User-driven exclusions from the Review screen (module 6b). Optional;
+  // omitted by callers that don't know about the feature (backwards-compat).
+  const rawExcluded = (body as { excludedTransactionIds?: unknown })
+    ?.excludedTransactionIds;
+  const excludedIds: string[] =
+    Array.isArray(rawExcluded) && rawExcluded.every((x) => typeof x === "string")
+      ? (rawExcluded as string[])
+      : [];
+  const excludedSet = new Set(excludedIds);
+
+  const allTxs = txs as CalculateRequestTransaction[];
+  const excludedTxs = allTxs.filter((t) => excludedSet.has(t.id));
+  const keptTxs = allTxs.filter((t) => !excludedSet.has(t.id));
+
+  const categorizationResults = toCategorizationResults(keptTxs);
 
   try {
     const cbs = getCbsProvider();
@@ -103,6 +123,8 @@ export async function POST(req: Request): Promise<Response> {
       meta: {
         usingMockData: cbs.usingMockData,
         calculatedAt: new Date().toISOString(),
+        excludedCount: excludedTxs.length,
+        excludedAmount: excludedTxs.reduce((s, t) => s + t.amount, 0),
       },
     };
     return NextResponse.json(response, { status: 200 });

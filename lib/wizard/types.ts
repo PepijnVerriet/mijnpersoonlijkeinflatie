@@ -6,6 +6,10 @@ import type { BankId } from "@/lib/types";
 export interface InflationMeta {
   usingMockData: boolean;
   calculatedAt: string;
+  /** Number of submitted transactions the server skipped (module 6b). */
+  excludedCount: number;
+  /** Total euro amount of those excluded transactions (module 6b). */
+  excludedAmount: number;
 }
 
 /** Steps in the upload-and-review wizard. */

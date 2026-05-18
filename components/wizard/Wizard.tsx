@@ -84,6 +84,7 @@ interface CalculateResponseBody {
 
 async function calculateInflation(
   result: ProcessResult,
+  excludedTransactionIds: ReadonlySet<string>,
 ): Promise<CalculateResponseBody> {
   const res = await fetch("/api/calculate", {
     method: "POST",
@@ -97,6 +98,7 @@ async function calculateInflation(
         description: t.description,
         category: t.category,
       })),
+      excludedTransactionIds: Array.from(excludedTransactionIds),
     }),
   });
   if (!res.ok) {
@@ -224,7 +226,7 @@ export function Wizard() {
     let cancelled = false;
     calculateInFlight.current = true;
     dispatch({ type: "CALCULATE_INFLATION_START" });
-    calculateInflation(result)
+    calculateInflation(result, state.excludedTransactionIds)
       .then(({ calculation, meta }) => {
         calculateInFlight.current = false;
         if (cancelled) return;
@@ -247,7 +249,12 @@ export function Wizard() {
     return () => {
       cancelled = true;
     };
-  }, [state.step, state.inflationCalculation, state.processResult]);
+  }, [
+    state.step,
+    state.inflationCalculation,
+    state.processResult,
+    state.excludedTransactionIds,
+  ]);
 
   const handleSubmitCorrections = useCallback(async () => {
     if (!state.processResult) return;

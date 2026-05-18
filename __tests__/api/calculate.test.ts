@@ -11,6 +11,10 @@ function buildRequest(body: unknown): Request {
   });
 }
 
+function withIds<T extends { id: string }>(items: T[], prefix: string): T[] {
+  return items.map((t, i) => ({ ...t, id: `${prefix}-${i}` }));
+}
+
 interface WireTx {
   id: string;
   date: string;
@@ -96,5 +100,97 @@ describe("POST /api/calculate", () => {
     const body = (await res.json()) as CalculateResponse;
     expect(body.calculation.categoriesWithoutCbsData).toEqual(["01"]);
     expect(body.calculation.spendingWithoutCbsData).toBeCloseTo(200, 6);
+  });
+
+  // ---------------------------------------------------------------------
+  // Module 6b-4: server-side filtering on excludedTransactionIds
+  // ---------------------------------------------------------------------
+
+  it("(6b-4) excluded transactions do not contribute to totalSpending", async () => {
+    // Same shape as the happy-path test: 15 cat 01 × €10 + 5 cat 11 × €20 = €250.
+    // Exclude 2 cat 11 × €20 → totalSpending should drop to €210.
+    // DEFAULT_MIN_TRANSACTIONS = 20, so we need 22+ before exclusion to
+    // safely test exclusion-of-some without tripping InsufficientDataError.
+    const cat01 = withIds(makeBulk(25, "01", 10), "a");
+    const cat11 = withIds(makeBulk(5, "11", 20), "b");
+    const txs = [...cat01, ...cat11];
+    const res = await POST(
+      buildRequest({
+        transactions: txs,
+        excludedTransactionIds: ["b-0", "b-1"],
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as CalculateResponse;
+    // 25*10 + 5*20 = 350; exclude 2*20 = 40 → 310 remain.
+    expect(body.calculation.totalSpending).toBeCloseTo(310, 6);
+  });
+
+  it("(6b-4) populates meta.excludedCount and meta.excludedAmount correctly", async () => {
+    // DEFAULT_MIN_TRANSACTIONS = 20, so we need 22+ before exclusion to
+    // safely test exclusion-of-some without tripping InsufficientDataError.
+    const cat01 = withIds(makeBulk(25, "01", 10), "a");
+    const cat11 = withIds(makeBulk(5, "11", 20), "b");
+    const txs = [...cat01, ...cat11];
+    const res = await POST(
+      buildRequest({
+        transactions: txs,
+        excludedTransactionIds: ["b-0", "b-1"],
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as CalculateResponse;
+    expect(body.meta.excludedCount).toBe(2);
+    expect(body.meta.excludedAmount).toBeCloseTo(40, 6);
+  });
+
+  it("(6b-4) empty/missing excludedTransactionIds is backwards-compatible", async () => {
+    // DEFAULT_MIN_TRANSACTIONS = 20, so we need 22+ before exclusion to
+    // safely test exclusion-of-some without tripping InsufficientDataError.
+    const cat01 = withIds(makeBulk(25, "01", 10), "a");
+    const cat11 = withIds(makeBulk(5, "11", 20), "b");
+    const txs = [...cat01, ...cat11];
+    const res = await POST(buildRequest({ transactions: txs }));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as CalculateResponse;
+    expect(body.meta.excludedCount).toBe(0);
+    expect(body.meta.excludedAmount).toBe(0);
+    expect(body.calculation.totalSpending).toBeCloseTo(350, 6);
+  });
+
+  it("(6b-4) phantom IDs in excludedTransactionIds are silently ignored", async () => {
+    // DEFAULT_MIN_TRANSACTIONS = 20, so we need 22+ before exclusion to
+    // safely test exclusion-of-some without tripping InsufficientDataError.
+    const cat01 = withIds(makeBulk(25, "01", 10), "a");
+    const cat11 = withIds(makeBulk(5, "11", 20), "b");
+    const txs = [...cat01, ...cat11];
+    const res = await POST(
+      buildRequest({
+        transactions: txs,
+        excludedTransactionIds: ["ghost-1", "does-not-exist"],
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as CalculateResponse;
+    expect(body.meta.excludedCount).toBe(0);
+    expect(body.meta.excludedAmount).toBe(0);
+    expect(body.calculation.totalSpending).toBeCloseTo(350, 6);
+  });
+
+  it("(6b-4) excluding every transaction returns 422 InsufficientDataError", async () => {
+    // DEFAULT_MIN_TRANSACTIONS = 20, so we need 22+ before exclusion to
+    // safely test exclusion-of-some without tripping InsufficientDataError.
+    const cat01 = withIds(makeBulk(25, "01", 10), "a");
+    const cat11 = withIds(makeBulk(5, "11", 20), "b");
+    const txs = [...cat01, ...cat11];
+    const res = await POST(
+      buildRequest({
+        transactions: txs,
+        excludedTransactionIds: txs.map((t) => t.id),
+      }),
+    );
+    expect(res.status).toBe(422);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toMatch(/(Geen transacties|Te weinig data)/);
   });
 });
