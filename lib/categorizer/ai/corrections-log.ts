@@ -48,11 +48,17 @@ function detectSource(): CorrectionSource {
  * Append one entry to the log. Errors (file-system permissions, no disk
  * space, EROFS on Vercel) are logged to the console but never bubble up:
  * a failed write must never block the user's correction flow.
+ *
+ * Privacy-default: the log is OFF unless `CORRECTIONS_LOG_ENABLED=true` is
+ * set explicitly. Production deploys leave it unset; the local developer
+ * can enable it via `.env.local` for manual keyword-review.
  */
 export async function logUserCorrection(
   entry: UserCorrectionEntry,
   options: { path?: string } = {},
 ): Promise<void> {
+  if (process.env.CORRECTIONS_LOG_ENABLED !== "true") return;
+
   const fullEntry: Required<Pick<UserCorrectionEntry, "timestamp" | "source">> &
     UserCorrectionEntry = {
     timestamp: entry.timestamp ?? new Date().toISOString(),

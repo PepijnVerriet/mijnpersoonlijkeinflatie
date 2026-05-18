@@ -111,6 +111,11 @@ Modulair opgebouwd in losse, onafhankelijke modules:
     (data/user-corrections.log of equivalent), niet teruggevoerd in 
     de globale AI-cache. Bedoeld voor periodieke handmatige review 
     om keywords.ts uit te breiden. Voorkomt vervuiling tussen gebruikers.
+    
+    Privacy-default: log is OFF tenzij env-var CORRECTIONS_LOG_ENABLED=true 
+    expliciet is gezet. Productie (Vercel) laat hem ongezet — geen log. 
+    Lokaal zet je hem in .env.local aan om correcties te kunnen 
+    reviewen voor keyword-uitbreiding.
 
 22. Doorgaan zonder alles te corrigeren is toegestaan met gentle nudge: 
     'Je hebt X transacties open, die staan voor Y% van je uitgaven 

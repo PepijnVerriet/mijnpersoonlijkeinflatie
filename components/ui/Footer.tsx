@@ -4,7 +4,7 @@ export function Footer() {
   return (
     <footer className="flex flex-col items-start justify-between gap-6 border-t border-border bg-bg px-[18px] py-6 text-[12.5px] text-ink-3 md:flex-row md:px-8 md:py-8">
       <div className="flex flex-wrap gap-x-[18px] gap-y-2">
-        <Link href="#" className="text-ink-3 no-underline hover:text-ink-1">
+        <Link href="/privacy" className="text-ink-3 no-underline hover:text-ink-1">
           Privacy
         </Link>
         <Link href="#" className="text-ink-3 no-underline hover:text-ink-1">

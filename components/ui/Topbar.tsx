@@ -23,7 +23,7 @@ export function Topbar() {
           Methodologie
         </Link>
         <Link
-          href="#"
+          href="/privacy"
           className="text-[13.5px] tracking-[-0.005em] text-ink-3 no-underline hover:text-ink-1"
         >
           Privacy

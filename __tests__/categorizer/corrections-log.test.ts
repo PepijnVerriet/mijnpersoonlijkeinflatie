@@ -10,14 +10,23 @@ import {
 describe("logUserCorrection", () => {
   let dir: string;
   let path: string;
+  let originalEnabled: string | undefined;
 
   beforeEach(() => {
+    // Privacy-default is "off"; tests need to opt in explicitly.
+    originalEnabled = process.env.CORRECTIONS_LOG_ENABLED;
+    process.env.CORRECTIONS_LOG_ENABLED = "true";
     dir = mkdtempSync(join(tmpdir(), "corrections-"));
     path = join(dir, "user-corrections.log");
   });
 
   afterEach(() => {
     rmSync(dir, { recursive: true, force: true });
+    if (originalEnabled === undefined) {
+      delete process.env.CORRECTIONS_LOG_ENABLED;
+    } else {
+      process.env.CORRECTIONS_LOG_ENABLED = originalEnabled;
+    }
   });
 
   it("creates the log file on first write and appends one JSONL line", async () => {
@@ -103,19 +112,37 @@ describe("logUserCorrection", () => {
       ),
     ).resolves.toBeUndefined();
   });
+
+  it("skips writing entirely when CORRECTIONS_LOG_ENABLED is unset", async () => {
+    delete process.env.CORRECTIONS_LOG_ENABLED;
+    await logUserCorrection(
+      { merchant: "x", description: "y", aiSuggested: null, userChose: "01" },
+      { path },
+    );
+    // No file was created: the call should have been a no-op.
+    expect(existsSync(path)).toBe(false);
+  });
 });
 
 describe("logUserCorrections (batch)", () => {
   let dir: string;
   let path: string;
+  let originalEnabled: string | undefined;
 
   beforeEach(() => {
+    originalEnabled = process.env.CORRECTIONS_LOG_ENABLED;
+    process.env.CORRECTIONS_LOG_ENABLED = "true";
     dir = mkdtempSync(join(tmpdir(), "corrections-"));
     path = join(dir, "log.log");
   });
 
   afterEach(() => {
     rmSync(dir, { recursive: true, force: true });
+    if (originalEnabled === undefined) {
+      delete process.env.CORRECTIONS_LOG_ENABLED;
+    } else {
+      process.env.CORRECTIONS_LOG_ENABLED = originalEnabled;
+    }
   });
 
   it("returns the number of entries it tried to write", async () => {

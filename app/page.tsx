@@ -28,14 +28,17 @@ const STEPS: Array<{ n: string; t: string; d: string; meta: string }> = [
 ];
 
 const PRIVACY: Array<[string, string]> = [
-  ["Niets opgeslagen", "Geen database, geen logs. Sluit je tab en alles is weg."],
   [
-    "Geen account, geen tracking",
-    "Geen registratie. Geen cookies behalve een sessie-id.",
+    "Niets opgeslagen",
+    "Geen database. Alleen tijdelijke verwerking, geen permanente opslag van je gegevens.",
   ],
   [
-    "AI ziet alleen handelaars",
-    "Voor categorisatie sturen we alleen merchant-namen, geen bedragen of namen.",
+    "Geen cookies, geen tracking",
+    "Geen cookies. Geen analytics. Helemaal niets.",
+  ],
+  [
+    "AI ziet alleen handelaar + omschrijving",
+    "AI ziet alleen de handelaar of tegenpartij en de transactie-omschrijving. Geen bedragen, geen IBANs, geen jouw eigen naam.",
   ],
   [
     "Open methodologie",
