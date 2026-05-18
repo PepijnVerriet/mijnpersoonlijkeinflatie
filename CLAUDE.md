@@ -242,6 +242,14 @@ Modulair opgebouwd in losse, onafhankelijke modules:
     - D. Terug-knop naar Review → uitsluitingen blijven gemarkeerd
     - E. Sluit ALLE transacties uit → Resultaat-scherm toont 422 error, 
       terug-knop herstelt
+38. Privacy-claims (na data-flow audit):
+    - PDF: in-memory verwerking, geen disk-write
+    - AI: stuurt counterpartyName + raw description naar Anthropic
+      (NIET alleen merchants, zoals oude landing-page claim suggereerde)
+    - Geen cookies, geen analytics, geen localStorage
+    - Corrections-log: uitgeschakeld voor productie via env-var
+    - Anthropic retentie: 30 dagen standaard, geen training
+    - CBS Open Data: anoniem fetch, geen identificatie van eindgebruiker
 
 \## Werkstroom
 
@@ -290,9 +298,10 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 6b-4: calculate-route filtering → AF, gecommit (baseline 268/0)
 - Module 6b-5: Resultaat transparantie-blok → AF, gecommit
 - Module 6b-6: tests + end-to-end walkthrough → AF, gecommit (baseline 271/0)
-- Module 6b uitsluit-feature → KLAAR (6 fasen + 1 test-baseline herstel)
-- Privacy-pagina → NOG NIET
-- GitHub + Vercel deployment → NOG NIET
+- Module 6: AF, hele uitsluit-feature gedeployd
+- Pre-launch: Privacy-pagina + landing-page fix + corrections-log uitschakelen → BEZIG
+- Daarna: GitHub repo + Vercel deployment + domain hookup → NOG NIET
+
 
 
 ## Open punten voor volgende sessie
