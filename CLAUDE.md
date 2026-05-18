@@ -244,8 +244,9 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 5b: AF, gecommit
 - Module 5c: Mock-rates uitbreiden → AF, gecommit
 - Module 5d: Keywords herwerken → AF, gecommit (coverage 77% → 79,8%)
-- Module 5e: AI-prompts updaten + cache reset → BEZIG
-- Module 5f-g → NOG NIET
+- Module 5e: AI-prompts updaten + cache reset → AF, gecommit
+- Module 5f: UI-banner voor CBS-fout → BEZIG
+- Module 5g: End-to-end test → NOG NIET
 - Privacy-pagina → NOG NIET
 - GitHub + Vercel deployment → NOG NIET
 
