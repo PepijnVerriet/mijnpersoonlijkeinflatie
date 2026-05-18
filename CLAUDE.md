@@ -197,6 +197,16 @@ Modulair opgebouwd in losse, onafhankelijke modules:
     
     Caching: JSON-bestand met TTL (24h), analoog aan ai-cache.json. 
     Bestand staat in lib/cbs/data/api-cache.json, gitignored.
+34. Keywords mapping-keuzes (module 5d):
+    - Streaming/games (Spotify, Netflix, Steam): blijven in 09 Recreatie
+    - Bankkosten (servicepakketten, betaalrekening): naar 12 Verzekeringen
+    - Online cursussen (Coursera, Udemy): naar 10 Onderwijs (geen keywords nu, AI vangt op)
+    - Telecom (T-Mobile, KPN, Ziggo): naar 08 Informatie en communicatie
+    - Software-abonnementen (Adobe, Microsoft 365): naar 08
+    - Verzekeringen (zorg, auto, woon, leven): naar 12
+    - Restcategorie (kapper, stomerij): naar 13 Diversen
+    - ANWB: blijft op 07 (wegenwacht dominant)
+    - MediaMarkt, Coolblue: blijven op 09 (transactie-data toont alleen winkelnaam)
 
 \## Werkstroom
 
@@ -233,8 +243,9 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 5a: AF, gecommit
 - Module 5b: AF, gecommit
 - Module 5c: Mock-rates uitbreiden → AF, gecommit
-- Module 5d: Keywords herwerken → BEZIG
-- Module 5e-g → NOG NIET
+- Module 5d: Keywords herwerken → AF, gecommit (coverage 77% → 79,8%)
+- Module 5e: AI-prompts updaten + cache reset → BEZIG
+- Module 5f-g → NOG NIET
 - Privacy-pagina → NOG NIET
 - GitHub + Vercel deployment → NOG NIET
 
