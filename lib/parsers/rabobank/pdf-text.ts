@@ -1,12 +1,12 @@
 /**
  * PDF text extraction for Rabobank statements.
  *
- * Uses pdfjs-dist (legacy build, works in Node and the browser) and groups the
- * positioned text fragments into physical lines, keeping x-coordinates so the
- * caller can tell the debit column ("Mutaties af") from the credit column
+ * Uses unpdf (serverless build of PDF.js with bundled polyfills) and groups
+ * the positioned text fragments into physical lines, keeping x-coordinates so
+ * the caller can tell the debit column ("Mutaties af") from the credit column
  * ("Mutaties bij").
  */
-import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+import { getDocumentProxy } from "unpdf";
 
 import type { PdfTextLine } from "@/lib/parsers/types";
 
@@ -19,7 +19,7 @@ const LINE_Y_TOLERANCE = 2;
  */
 export async function extractTextLines(buffer: Buffer): Promise<PdfTextLine[]> {
   const data = new Uint8Array(buffer);
-  const doc = await pdfjs.getDocument({ data, useSystemFonts: true }).promise;
+  const doc = await getDocumentProxy(data);
 
   const lines: PdfTextLine[] = [];
   for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
