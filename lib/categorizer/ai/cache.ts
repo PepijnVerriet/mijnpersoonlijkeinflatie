@@ -72,6 +72,7 @@ const DEFAULT_COMMENT =
  */
 export class JsonFileCache implements AiCache {
   private data: CacheFileShape;
+  private writesDisabled = false;
 
   constructor(private readonly path: string) {
     this.data = JsonFileCache.read(path);
@@ -101,7 +102,21 @@ export class JsonFileCache implements AiCache {
 
   async set(key: string, value: AiCategoryResult): Promise<void> {
     this.data.entries[key] = value;
-    mkdirSync(dirname(this.path), { recursive: true });
-    writeFileSync(this.path, JSON.stringify(this.data, null, 2) + "\n", "utf8");
+    if (this.writesDisabled) return;
+    try {
+      mkdirSync(dirname(this.path), { recursive: true });
+      writeFileSync(
+        this.path,
+        JSON.stringify(this.data, null, 2) + "\n",
+        "utf8",
+      );
+    } catch (err) {
+      this.writesDisabled = true;
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[ai-cache] disk write failed, continuing in-memory only:",
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
 }

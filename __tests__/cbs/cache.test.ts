@@ -90,4 +90,28 @@ describe("JsonFileCbsCache", () => {
     vi.advanceTimersByTime(1001);
     expect(cache.getFresh("2026-03")).toBeNull();
   });
+
+  it("does not throw when disk writes fail (read-only FS, Vercel)", () => {
+    // Force mkdirSync to fail by aiming at a path *inside a regular file*.
+    // mkdirSync then throws ENOTDIR, simulating Vercel /var/task/ rejecting
+    // writes with EROFS/ENOENT.
+    const blocker = join(dir, "blocker");
+    writeFileSync(blocker, "i am a file, not a directory", "utf8");
+    const unwritablePath = join(blocker, "api-cache.json");
+
+    const cache = new JsonFileCbsCache(unwritablePath);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(() => cache.put("2026-03", SAMPLE_RATES)).not.toThrow();
+    // In-memory state must still reflect the put.
+    expect(cache.getFresh("2026-03")).toEqual(SAMPLE_RATES);
+    expect(warnSpy).toHaveBeenCalledOnce();
+
+    // Second failed put must NOT warn again (writesDisabled latches).
+    cache.put("2026-04", SAMPLE_RATES);
+    expect(cache.getFresh("2026-04")).toEqual(SAMPLE_RATES);
+    expect(warnSpy).toHaveBeenCalledOnce();
+
+    warnSpy.mockRestore();
+  });
 });

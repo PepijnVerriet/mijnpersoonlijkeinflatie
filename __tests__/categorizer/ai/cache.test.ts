@@ -1,7 +1,13 @@
-import { mkdtempSync, readFileSync, rmSync, existsSync } from "node:fs";
+import {
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  existsSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   InMemoryCache,
   JsonFileCache,
@@ -129,5 +135,29 @@ describe("JsonFileCache", () => {
     fs.writeFileSync(path, "not json", "utf8");
     const c = new JsonFileCache(path);
     expect(c.get("anything")).toBeNull();
+  });
+
+  it("does not throw when disk writes fail (read-only FS, Vercel)", async () => {
+    // Make the parent path unwritable by pointing the cache at a path
+    // *inside a regular file*. mkdirSync then fails with ENOTDIR, exactly
+    // like Vercel's /var/task/ rejects mkdir with EROFS/ENOENT.
+    const blocker = join(dir, "blocker");
+    writeFileSync(blocker, "i am a file, not a directory", "utf8");
+    const unwritablePath = join(blocker, "ai-cache.json");
+
+    const c = new JsonFileCache(unwritablePath);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    await expect(c.set("kpn", "08")).resolves.toBeUndefined();
+    // In-memory state must still reflect the set.
+    expect(c.get("kpn")).toBe("08");
+    expect(warnSpy).toHaveBeenCalledOnce();
+
+    // Second failed write must NOT warn again (writesDisabled latches).
+    await c.set("uber", "07");
+    expect(c.get("uber")).toBe("07");
+    expect(warnSpy).toHaveBeenCalledOnce();
+
+    warnSpy.mockRestore();
   });
 });

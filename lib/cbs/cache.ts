@@ -68,6 +68,7 @@ const DEFAULT_COMMENT =
 
 export class JsonFileCbsCache implements CbsCache {
   private data: CacheFileShape;
+  private writesDisabled = false;
 
   constructor(
     private readonly path: string,
@@ -110,11 +111,21 @@ export class JsonFileCbsCache implements CbsCache {
       fetchedAt: new Date().toISOString(),
       rates: { ...rates },
     };
-    mkdirSync(dirname(this.path), { recursive: true });
-    writeFileSync(
-      this.path,
-      JSON.stringify(this.data, null, 2) + "\n",
-      "utf8",
-    );
+    if (this.writesDisabled) return;
+    try {
+      mkdirSync(dirname(this.path), { recursive: true });
+      writeFileSync(
+        this.path,
+        JSON.stringify(this.data, null, 2) + "\n",
+        "utf8",
+      );
+    } catch (err) {
+      this.writesDisabled = true;
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[cbs-cache] disk write failed, continuing in-memory only:",
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
 }
