@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  AVAILABLE_HEADLINE_MONTHS,
   AVAILABLE_MONTHS,
   getMockRatesRaw,
   mockProvider,
@@ -7,6 +8,7 @@ import {
 import { CATEGORY_CODES } from "@/lib/cbs/categories";
 import { CbsDataNotAvailableError } from "@/lib/cbs/types";
 import rawRates from "@/lib/cbs/data/mock-rates.json";
+import rawHeadlines from "@/lib/cbs/data/mock-headlines.json";
 
 describe("mockProvider.getMonthlyRates", () => {
   it("returns all twelve category codes for 2025-04", async () => {
@@ -104,5 +106,51 @@ describe("mock-rates.json coverage", () => {
     const apr2025 = rates["2025-04"]["04"];
     expect(jan2024).toBeGreaterThan(8); // early-2024 peak
     expect(apr2025).toBeLessThan(jan2024); // overall decline
+  });
+});
+
+describe("mockProvider.getMonthlyHeadline", () => {
+  it("returns the headline for a known month", async () => {
+    // Echte CBS-waarde voor april 2025 (T001112, jaarmutatie).
+    const headline = await mockProvider.getMonthlyHeadline("2025-04");
+    expect(headline).toBe(4.0);
+  });
+
+  it("matches the JSON fixture exactly", async () => {
+    const headline = await mockProvider.getMonthlyHeadline("2024-12");
+    expect(headline).toBe(
+      (rawHeadlines as { headlines: Record<string, number> }).headlines["2024-12"],
+    );
+  });
+
+  it("throws CbsDataNotAvailableError for an unknown month", async () => {
+    await expect(
+      mockProvider.getMonthlyHeadline("2099-12"),
+    ).rejects.toBeInstanceOf(CbsDataNotAvailableError);
+  });
+
+  it("throws CbsDataNotAvailableError for malformed input", async () => {
+    await expect(
+      mockProvider.getMonthlyHeadline("not-a-month"),
+    ).rejects.toBeInstanceOf(CbsDataNotAvailableError);
+  });
+});
+
+describe("mock-headlines.json coverage", () => {
+  it("covers every month that mock-rates.json covers", () => {
+    for (const month of AVAILABLE_MONTHS) {
+      expect(
+        AVAILABLE_HEADLINE_MONTHS.includes(month),
+        `headline missing for ${month}`,
+      ).toBe(true);
+    }
+  });
+
+  it("contains real CBS values (sanity-check against known points)", () => {
+    const h = (rawHeadlines as { headlines: Record<string, number> }).headlines;
+    // Sanity-check op enkele bekende echte CBS-waardes (live opgehaald).
+    expect(h["2024-04"]).toBe(2.7);
+    expect(h["2024-12"]).toBe(4.1);
+    expect(h["2025-04"]).toBe(4.0);
   });
 });

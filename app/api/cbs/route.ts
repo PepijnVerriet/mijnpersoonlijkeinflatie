@@ -28,8 +28,16 @@ export async function GET(req: Request): Promise<Response> {
     const filteredRates = Object.fromEntries(
       Object.entries(rates).filter(([code]) => USER_FACING_SET.has(code)),
     );
+    // Headline is optional in the response. Treat "no headline for this
+    // month" as success-with-null, not 404 — the rates are still useful.
+    let headline: number | null = null;
+    try {
+      headline = await cbs.provider.getMonthlyHeadline(month);
+    } catch (err) {
+      if (!(err instanceof CbsDataNotAvailableError)) throw err;
+    }
     return NextResponse.json(
-      { month, rates: filteredRates },
+      { month, rates: filteredRates, headline },
       { status: 200, headers: { "Cache-Control": CACHE_HEADER } },
     );
   } catch (err) {

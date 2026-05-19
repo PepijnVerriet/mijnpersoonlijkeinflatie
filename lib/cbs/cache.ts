@@ -26,6 +26,12 @@ interface CacheEntry {
   /** ISO timestamp; we compare against `Date.now()` for TTL freshness. */
   fetchedAt: string;
   rates: CategoryRates;
+  /**
+   * CBS headline CPI year-over-year (key `T001112`). `null` if the month's
+   * response did not contain the headline row (legacy entries or partial
+   * data). Stored alongside `rates` so a single fetch covers both.
+   */
+  headline: number | null;
 }
 
 interface CacheFileShape {
@@ -36,8 +42,13 @@ interface CacheFileShape {
 export interface CbsCache {
   /** Returns a defensive copy of the rates if cached and fresh; `null` otherwise. */
   getFresh(month: string): CategoryRates | null;
-  /** Stores rates for the given month, stamped with the current time. */
-  put(month: string, rates: CategoryRates): void;
+  /**
+   * Returns the cached headline rate if fresh; `null` if not cached, expired,
+   * or never recorded for this month.
+   */
+  getFreshHeadline(month: string): number | null;
+  /** Stores rates + headline for the given month, stamped with the current time. */
+  put(month: string, rates: CategoryRates, headline: number | null): void;
 }
 
 export class InMemoryCbsCache implements CbsCache {
@@ -45,19 +56,30 @@ export class InMemoryCbsCache implements CbsCache {
 
   constructor(private readonly ttlMs: number = DEFAULT_TTL_MS) {}
 
-  getFresh(month: string): CategoryRates | null {
+  private freshEntry(month: string): CacheEntry | null {
     const entry = this.entries.get(month);
     if (!entry) return null;
     if (Date.now() - new Date(entry.fetchedAt).getTime() > this.ttlMs) {
       return null;
     }
-    return { ...entry.rates };
+    return entry;
   }
 
-  put(month: string, rates: CategoryRates): void {
+  getFresh(month: string): CategoryRates | null {
+    const entry = this.freshEntry(month);
+    return entry ? { ...entry.rates } : null;
+  }
+
+  getFreshHeadline(month: string): number | null {
+    const entry = this.freshEntry(month);
+    return entry ? entry.headline : null;
+  }
+
+  put(month: string, rates: CategoryRates, headline: number | null): void {
     this.entries.set(month, {
       fetchedAt: new Date().toISOString(),
       rates: { ...rates },
+      headline,
     });
   }
 }
@@ -97,19 +119,31 @@ export class JsonFileCbsCache implements CbsCache {
     }
   }
 
-  getFresh(month: string): CategoryRates | null {
+  private freshEntry(month: string): CacheEntry | null {
     const entry = this.data.entries[month];
     if (!entry) return null;
     if (Date.now() - new Date(entry.fetchedAt).getTime() > this.ttlMs) {
       return null;
     }
-    return { ...entry.rates };
+    return entry;
   }
 
-  put(month: string, rates: CategoryRates): void {
+  getFresh(month: string): CategoryRates | null {
+    const entry = this.freshEntry(month);
+    return entry ? { ...entry.rates } : null;
+  }
+
+  getFreshHeadline(month: string): number | null {
+    const entry = this.freshEntry(month);
+    // Legacy entries (pre-headline) may have `undefined`; treat as missing.
+    return entry && typeof entry.headline === "number" ? entry.headline : null;
+  }
+
+  put(month: string, rates: CategoryRates, headline: number | null): void {
     this.data.entries[month] = {
       fetchedAt: new Date().toISOString(),
       rates: { ...rates },
+      headline,
     };
     if (this.writesDisabled) return;
     try {

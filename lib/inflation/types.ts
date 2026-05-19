@@ -70,11 +70,11 @@ export interface InflationCalculation {
   /** Euros tied to those CBS-missing categories. */
   spendingWithoutCbsData: number;
   /**
-   * Official CBS headline year-over-year inflation over the same months,
-   * computed with CBS-published basket weights. **Not implemented in v1**:
-   * our CBS layer only exposes per-category rates, not the official basket
-   * weights. To be backed by CBS table 84133NED (or equivalent) once the
-   * real CBS API integration replaces the mock.
+   * Official CBS headline year-over-year inflation over the same months.
+   * Sourced from CBS table 86141NED key `T001112` (basket-weighted total).
+   * Computed as a simple arithmetic mean of the monthly headlines across
+   * `monthsIncluded`. `undefined` when no headline data is available
+   * (e.g. mock months without headlines, or CBS unreachable).
    */
   referenceInflation?: number;
 }

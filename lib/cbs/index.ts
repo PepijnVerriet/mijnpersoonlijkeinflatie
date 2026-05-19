@@ -65,6 +65,19 @@ export function getCbsProvider(): ScopedCbsProvider {
         return mockProvider.getMonthlyRates(month);
       }
     },
+    async getMonthlyHeadline(month: string): Promise<number> {
+      try {
+        return await cbsApiProvider.getMonthlyHeadline(month);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[CBS] live headline fetch failed for ${month}, falling back to mock:`,
+          err instanceof Error ? err.message : err,
+        );
+        scope.usingMockData = true;
+        return mockProvider.getMonthlyHeadline(month);
+      }
+    },
   };
   return scope;
 }

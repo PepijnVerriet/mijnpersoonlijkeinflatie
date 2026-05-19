@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 
 const SAMPLE_CBS_PAYLOAD = {
   value: [
+    { Bestedingscategorieen: "T001112  ", JaarmutatieCPI_5: 2.7 },
     { Bestedingscategorieen: "CPI010000", JaarmutatieCPI_5: 2.0 },
     { Bestedingscategorieen: "CPI020000", JaarmutatieCPI_5: 2.1 },
   ],
@@ -108,5 +109,30 @@ describe("getCbsProvider — live mode", () => {
     await scope.provider.getMonthlyRates("2026-03"); // succeeds via live
     // The flag stays true once tripped — meaningful "this calc used mock somewhere".
     expect(scope.usingMockData).toBe(true);
+  });
+
+  it("forwards getMonthlyHeadline to live API and falls back on error", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => SAMPLE_CBS_PAYLOAD,
+    }) as unknown as typeof fetch;
+
+    const { getCbsProvider } = await import("@/lib/cbs");
+    const liveScope = getCbsProvider();
+    expect(await liveScope.provider.getMonthlyHeadline("2026-03")).toBe(2.7);
+    expect(liveScope.usingMockData).toBe(false);
+
+    // Now make a fresh scope that has a failing fetch; it should fall back
+    // to mock and flip usingMockData.
+    globalThis.fetch = vi
+      .fn()
+      .mockRejectedValue(new Error("ECONNREFUSED")) as unknown as typeof fetch;
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const fallbackScope = getCbsProvider();
+    // 2025-04 is in mock-headlines.json so the fallback has data.
+    const headline = await fallbackScope.provider.getMonthlyHeadline("2025-04");
+    expect(typeof headline).toBe("number");
+    expect(fallbackScope.usingMockData).toBe(true);
   });
 });

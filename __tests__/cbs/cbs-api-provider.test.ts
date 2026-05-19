@@ -154,3 +154,57 @@ describe("CbsApiProvider.getMonthlyRates", () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("CbsApiProvider.getMonthlyHeadline", () => {
+  let originalFetch: typeof globalThis.fetch;
+
+  beforeEach(() => {
+    originalFetch = globalThis.fetch;
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+    vi.restoreAllMocks();
+  });
+
+  it("parses T001112 from the same odata response as rates", async () => {
+    globalThis.fetch = mockFetch(() => ({
+      ok: true,
+      status: 200,
+      json: async () => buildPayload(),
+    }));
+    const provider = new CbsApiProvider(new InMemoryCbsCache());
+    const headline = await provider.getMonthlyHeadline("2026-03");
+    expect(headline).toBe(2.7);
+  });
+
+  it("shares its fetch with getMonthlyRates (one network call covers both)", async () => {
+    const fetchSpy = mockFetch(() => ({
+      ok: true,
+      status: 200,
+      json: async () => buildPayload(),
+    }));
+    globalThis.fetch = fetchSpy;
+    const provider = new CbsApiProvider(new InMemoryCbsCache());
+    await provider.getMonthlyRates("2026-03");
+    const headline = await provider.getMonthlyHeadline("2026-03");
+    expect(headline).toBe(2.7);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("throws CbsDataNotAvailableError when the response lacks T001112", async () => {
+    globalThis.fetch = mockFetch(() => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        value: [
+          { Bestedingscategorieen: "CPI010000", JaarmutatieCPI_5: 2.0 },
+        ],
+      }),
+    }));
+    const provider = new CbsApiProvider(new InMemoryCbsCache());
+    await expect(provider.getMonthlyHeadline("2026-03")).rejects.toMatchObject({
+      name: "CbsDataNotAvailableError",
+    });
+  });
+});

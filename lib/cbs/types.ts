@@ -39,6 +39,16 @@ export interface CbsInflationProvider {
    * @throws {CbsDataNotAvailableError} if the month is not available.
    */
   getMonthlyRates(month: string): Promise<CategoryRates>;
+  /**
+   * Year-over-year change of the headline CPI (CBS table 86141NED key
+   * `T001112`) for the requested month, in percent. This is the official
+   * "Nederlandse inflatie" figure, basket-weighted by CBS — distinct from
+   * the per-category rates above.
+   *
+   * @param month Period in "YYYY-MM" form, e.g. "2025-04".
+   * @throws {CbsDataNotAvailableError} if the month is not available.
+   */
+  getMonthlyHeadline(month: string): Promise<number>;
 }
 
 /** Thrown when a provider has no data for the requested month. */

@@ -5,6 +5,67 @@ import { Badge } from "@/components/ui/Badge";
 import { ArrowIcon, CheckIcon, LockIcon } from "@/components/ui/icons";
 import { MorphingHero } from "@/components/landing/MorphingHero";
 import { Faq } from "@/components/landing/Faq";
+import { getCbsProvider } from "@/lib/cbs";
+import { CbsDataNotAvailableError } from "@/lib/cbs/types";
+
+/**
+ * Regenerate the landing page at most once per day. CBS publishes headlines
+ * monthly around the 6th, so 24h gives us a fresh figure within a day of it
+ * landing.
+ */
+export const revalidate = 86400;
+
+const NL_MONTHS = [
+  "januari", "februari", "maart", "april", "mei", "juni",
+  "juli", "augustus", "september", "oktober", "november", "december",
+];
+
+function fmtNlPct(n: number): string {
+  return n.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+function fmtMonthYear(ym: string): string {
+  const [yr, mo] = ym.split("-");
+  const idx = Number(mo) - 1;
+  return `${NL_MONTHS[idx] ?? mo} ${yr}`;
+}
+
+/** Generate "YYYY-MM" for `monthsAgo` months back from `now`. */
+function monthOffset(now: Date, monthsAgo: number): string {
+  const d = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+/**
+ * Find the most recent month with a CBS headline. CBS publishes on/around
+ * the 6th of the following month, so we walk back from "vorige maand" until
+ * a month responds. Returns `null` if every attempt fails — the page then
+ * renders a graceful fallback paragraph without the figure.
+ */
+async function fetchLatestHeadline(): Promise<{
+  month: string;
+  rate: number;
+} | null> {
+  const cbs = getCbsProvider();
+  const now = new Date();
+  // Try "vorige maand" first, then walk back. The first 1-3 steps cover the
+  // CBS publication lag (CBS publishes around the 6th of the next month).
+  // The wider range is for mock-mode in dev: mock data may lag real-world
+  // months by a year or more, but the page should still render plausibly.
+  for (let i = 1; i <= 12; i++) {
+    const month = monthOffset(now, i);
+    try {
+      const rate = await cbs.provider.getMonthlyHeadline(month);
+      return { month, rate };
+    } catch (err) {
+      if (!(err instanceof CbsDataNotAvailableError)) {
+        // Any non-availability error (network, parse) — stop and degrade.
+        return null;
+      }
+    }
+  }
+  return null;
+}
 
 const STEPS: Array<{ n: string; t: string; d: string; meta: string }> = [
   {
@@ -46,7 +107,9 @@ const PRIVACY: Array<[string, string]> = [
   ],
 ];
 
-export default function Home() {
+export default async function Home() {
+  const headline = await fetchLatestHeadline();
+
   return (
     <div className="flex min-h-screen flex-col bg-bg">
       <Topbar />
@@ -57,7 +120,7 @@ export default function Home() {
           <div>
             <div className="mb-6">
               <Badge tone="accent" dot>
-                april 2025 · CBS COICOP-12
+                {headline ? `${fmtMonthYear(headline.month)} · CBS COICOP-12` : "CBS COICOP-12"}
               </Badge>
             </div>
             <h1 className="m-0 mb-[22px] font-serif text-[42px] font-medium leading-[1.02] tracking-[-0.025em] text-ink-1 text-balance md:text-[68px]">
@@ -65,10 +128,20 @@ export default function Home() {
               <em className="italic text-accent">anders</em>. Wat is die van jou?
             </h1>
             <p className="m-0 mb-8 max-w-[520px] text-base leading-[1.55] text-ink-2 md:text-lg">
-              Het CBS rapporteerde vorige maand een inflatie van 3,5 %. Maar dat
-              is het gemiddelde van een gemiddeld huishouden. Upload je
-              bankafschrift en bereken het cijfer dat <em className="italic">jij</em>{" "}
-              betaalt.
+              {headline ? (
+                <>
+                  In {fmtMonthYear(headline.month)} rapporteerde het CBS een
+                  inflatie van {fmtNlPct(headline.rate)} %. Maar dat is het
+                  gemiddelde van een gemiddeld huishouden.
+                </>
+              ) : (
+                <>
+                  Het CBS publiceert maandelijks de gemiddelde inflatie. Maar
+                  dat is het gemiddelde van een gemiddeld huishouden.
+                </>
+              )}{" "}
+              Upload je bankafschrift en bereken het cijfer dat{" "}
+              <em className="italic">jij</em> betaalt.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Link
@@ -83,7 +156,7 @@ export default function Home() {
             </div>
           </div>
 
-          <MorphingHero />
+          <MorphingHero cbsHeadline={headline?.rate ?? null} />
         </section>
 
         {/* ============ HOW IT WORKS ============ */}

@@ -1,4 +1,5 @@
 import rawRates from "./data/mock-rates.json";
+import rawHeadlines from "./data/mock-headlines.json";
 import { CATEGORY_CODES } from "./categories";
 import {
   CbsDataNotAvailableError,
@@ -28,6 +29,14 @@ const RATES: Readonly<Record<string, CategoryRates>> = Object.freeze(
 /** All months present in the mock dataset, sorted ascending. */
 export const AVAILABLE_MONTHS: readonly string[] = Object.keys(RATES).sort();
 
+const HEADLINES: Readonly<Record<string, number>> = Object.freeze(
+  (rawHeadlines as { headlines: Record<string, number> }).headlines,
+);
+
+/** All months for which we have a mocked headline, sorted ascending. */
+export const AVAILABLE_HEADLINE_MONTHS: readonly string[] =
+  Object.keys(HEADLINES).sort();
+
 export const mockProvider: CbsInflationProvider = {
   async getMonthlyRates(month: string): Promise<CategoryRates> {
     if (!isValidMonth(month)) {
@@ -39,6 +48,17 @@ export const mockProvider: CbsInflationProvider = {
     }
     // Defensive copy so callers can't mutate the cached dataset.
     return { ...rates };
+  },
+
+  async getMonthlyHeadline(month: string): Promise<number> {
+    if (!isValidMonth(month)) {
+      throw new CbsDataNotAvailableError(month);
+    }
+    const headline = HEADLINES[month];
+    if (typeof headline !== "number") {
+      throw new CbsDataNotAvailableError(month);
+    }
+    return headline;
   },
 };
 

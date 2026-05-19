@@ -1,0 +1,29 @@
+{
+  "_comment": "Echte CBS-headline (tabel 86141NED, key T001112, JaarmutatieCPI_5) per maand, opgehaald via de live Open Data API. Anders dan mock-rates.json (waar de per-categorie cijfers fictief-maar-plausibel zijn), zijn de headlines hier exact zoals CBS ze publiceert — een enkel cijfer per maand is eenduidig na te slaan, dus fictie zou hier alleen maar verwarrend zijn.",
+  "headlines": {
+    "2024-01": 3.2,
+    "2024-02": 2.8,
+    "2024-03": 3.1,
+    "2024-04": 2.7,
+    "2024-05": 2.7,
+    "2024-06": 3.2,
+    "2024-07": 3.7,
+    "2024-08": 3.6,
+    "2024-09": 3.5,
+    "2024-10": 3.5,
+    "2024-11": 4.0,
+    "2024-12": 4.1,
+    "2025-01": 3.3,
+    "2025-02": 3.7,
+    "2025-03": 3.6,
+    "2025-04": 4.0,
+    "2025-05": 3.2,
+    "2025-06": 3.0,
+    "2025-07": 2.9,
+    "2025-08": 2.8,
+    "2025-09": 3.2,
+    "2025-10": 3.1,
+    "2025-11": 2.8,
+    "2025-12": 2.9
+  }
+}

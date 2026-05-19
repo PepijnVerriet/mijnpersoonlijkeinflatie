@@ -60,12 +60,20 @@ function fillMonth(
 
 function staticProvider(
   table: Record<string, Partial<CategoryRates>>,
+  headlines: Record<string, number> = {},
 ): CbsInflationProvider {
   return {
     async getMonthlyRates(month) {
       const rates = table[month];
       if (!rates) throw new CbsDataNotAvailableError(month);
       return rates as CategoryRates;
+    },
+    async getMonthlyHeadline(month) {
+      const headline = headlines[month];
+      if (typeof headline !== "number") {
+        throw new CbsDataNotAvailableError(month);
+      }
+      return headline;
     },
   };
 }
@@ -256,5 +264,62 @@ describe("calculateInflation — InsufficientDataError", () => {
 
   it("exposes DEFAULT_MIN_TRANSACTIONS as 20", () => {
     expect(DEFAULT_MIN_TRANSACTIONS).toBe(20);
+  });
+});
+
+describe("calculateInflation — referenceInflation (CBS headline)", () => {
+  it("equals the single month headline for a 1-month upload", async () => {
+    const inputs = fillMonth(20, 10, "01"); // all in 2025-04
+    const cbs = staticProvider({ "2025-04": { "01": 3.0 } }, { "2025-04": 4.0 });
+
+    const out = await calculateInflation(inputs, { cbsProvider: cbs });
+
+    expect(out.referenceInflation).toBeCloseTo(4.0, 6);
+  });
+
+  it("is the simple arithmetic mean across multiple months", async () => {
+    const jan = new Date(2025, 0, 15);
+    const feb = new Date(2025, 1, 10);
+    const inputs: CategorizationResult[] = [
+      ...Array.from({ length: 10 }, () => res(10, jan, "01")),
+      ...Array.from({ length: 10 }, () => res(10, feb, "01")),
+    ];
+    const cbs = staticProvider(
+      { "2025-01": { "01": 3.0 }, "2025-02": { "01": 3.0 } },
+      { "2025-01": 3.3, "2025-02": 3.7 },
+    );
+
+    const out = await calculateInflation(inputs, { cbsProvider: cbs });
+
+    // (3.3 + 3.7) / 2 = 3.5 — NOT spending-weighted (T001112 is already
+    // CBS-basket-weighted internally, so a plain mean is the right call).
+    expect(out.referenceInflation).toBeCloseTo(3.5, 6);
+  });
+
+  it("is undefined when no month has a headline", async () => {
+    const inputs = fillMonth(20, 10, "01");
+    const cbs = staticProvider({ "2025-04": { "01": 3.0 } }, {}); // no headlines
+
+    const out = await calculateInflation(inputs, { cbsProvider: cbs });
+
+    expect(out.referenceInflation).toBeUndefined();
+  });
+
+  it("averages over only the months that do return a headline", async () => {
+    const jan = new Date(2025, 0, 15);
+    const feb = new Date(2025, 1, 10);
+    const inputs: CategorizationResult[] = [
+      ...Array.from({ length: 10 }, () => res(10, jan, "01")),
+      ...Array.from({ length: 10 }, () => res(10, feb, "01")),
+    ];
+    // Only jan has a headline; feb throws CbsDataNotAvailableError.
+    const cbs = staticProvider(
+      { "2025-01": { "01": 3.0 }, "2025-02": { "01": 3.0 } },
+      { "2025-01": 3.3 },
+    );
+
+    const out = await calculateInflation(inputs, { cbsProvider: cbs });
+
+    expect(out.referenceInflation).toBeCloseTo(3.3, 6);
   });
 });

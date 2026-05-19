@@ -1,6 +1,10 @@
 import type { CategorizationResult } from "@/lib/categorizer/types";
 import { cbsProvider as defaultCbsProvider } from "@/lib/cbs";
-import type { CategoryCode, CbsInflationProvider } from "@/lib/cbs/types";
+import {
+  CbsDataNotAvailableError,
+  type CategoryCode,
+  type CbsInflationProvider,
+} from "@/lib/cbs/types";
 import { getWeightedCbsRate } from "./cbs-aggregation";
 import {
   groupByCategory,
@@ -12,6 +16,36 @@ import {
   type CategoryBreakdown,
   type InflationCalculation,
 } from "./types";
+
+/**
+ * Simple mean of the CBS headline (T001112) over the given months. Returns
+ * `undefined` when not a single month has a headline (CBS down, mock-only
+ * months with no headline data, etc.). T001112 is already CBS-basket-
+ * weighted, so a plain arithmetic mean here is the right aggregation — no
+ * spending-weighting on top.
+ */
+async function meanHeadline(
+  months: readonly string[],
+  provider: CbsInflationProvider,
+): Promise<number | undefined> {
+  if (months.length === 0) return undefined;
+  const settled = await Promise.allSettled(
+    months.map((m) => provider.getMonthlyHeadline(m)),
+  );
+  const values: number[] = [];
+  for (const result of settled) {
+    if (result.status === "fulfilled") {
+      values.push(result.value);
+    } else if (!(result.reason instanceof CbsDataNotAvailableError)) {
+      // Unexpected errors propagate, so the caller / route handler can
+      // surface a 500. "No data for this month" is expected; anything else
+      // is a real bug we shouldn't paper over.
+      throw result.reason;
+    }
+  }
+  if (values.length === 0) return undefined;
+  return values.reduce((s, v) => s + v, 0) / values.length;
+}
 
 /** Default floor below which a personal-inflation number is unreliable. */
 export const DEFAULT_MIN_TRANSACTIONS = 20;
@@ -118,6 +152,9 @@ export async function calculateInflation(
 
   const totalInflation = breakdown.reduce((s, r) => s + r.contribution, 0);
 
+  // -- 6. CBS headline reference over the same months -----------------------
+  const referenceInflation = await meanHeadline(months, provider);
+
   return {
     totalInflation,
     totalSpending,
@@ -129,6 +166,6 @@ export async function calculateInflation(
     breakdown,
     categoriesWithoutCbsData: missing.map((m) => m.code).sort(),
     spendingWithoutCbsData: missing.reduce((s, r) => s + r.spending, 0),
-    referenceInflation: undefined,
+    referenceInflation,
   };
 }

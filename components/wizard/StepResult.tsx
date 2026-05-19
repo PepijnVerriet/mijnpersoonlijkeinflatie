@@ -14,9 +14,6 @@ import { ComparisonBars } from "./result/ComparisonBars";
 import { HeroNumber } from "./result/HeroNumber";
 import { Spinner } from "./Spinner";
 
-/** Hard-coded headline reference rate while CBS API is unreachable. */
-const REFERENCE_INFLATION = 3.5;
-
 const NL_MONTHS = [
   "januari", "februari", "maart", "april", "mei", "juni",
   "juli", "augustus", "september", "oktober", "november", "december",
@@ -109,8 +106,10 @@ export function StepResult({
     grossSpending > 0 ? (categorisedSpending / grossSpending) * 100 : 0;
 
   const personal = calculation.totalInflation;
-  const diff = personal - REFERENCE_INFLATION;
-  const compare = compareLabel(personal, REFERENCE_INFLATION);
+  const reference = calculation.referenceInflation;
+  const hasReference = typeof reference === "number";
+  const diff = hasReference ? personal - reference : 0;
+  const compare = hasReference ? compareLabel(personal, reference) : null;
   const periodMonths = calculation.monthsIncluded;
   const top = [...calculation.breakdown]
     .sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution))
@@ -155,11 +154,10 @@ export function StepResult({
                 {" "}%{" "}
               </strong>
               {personal >= 0 ? "duurder" : "goedkoper"}.{" "}
-              {compare === "vergelijkbaar met" ? (
-                <>
-                  Dat is vergelijkbaar met het Nederlandse gemiddelde.
-                </>
-              ) : (
+              {hasReference && compare === "vergelijkbaar met" && (
+                <>Dat is vergelijkbaar met het Nederlandse gemiddelde.</>
+              )}
+              {hasReference && compare !== "vergelijkbaar met" && (
                 <>
                   Dat is{" "}
                   {Math.abs(diff).toLocaleString("nl-NL", {
@@ -172,41 +170,43 @@ export function StepResult({
             </p>
           </div>
 
-          {/* Comparison panel */}
-          <div className="rounded-token border border-border bg-surface p-[22px] md:p-7">
-            <div className="mb-[18px] text-[11.5px] font-medium uppercase tracking-[0.06em] text-ink-3">
-              Vergeleken met Nederland
+          {/* Comparison panel — only renders when we have a CBS headline. */}
+          {hasReference && (
+            <div className="rounded-token border border-border bg-surface p-[22px] md:p-7">
+              <div className="mb-[18px] text-[11.5px] font-medium uppercase tracking-[0.06em] text-ink-3">
+                Vergeleken met Nederland
+              </div>
+              <ComparisonBars personal={personal} reference={reference} />
+              <div className="mt-[18px] border-t border-border pt-4 text-[13px] leading-[1.55] text-ink-2">
+                {compare === "vergelijkbaar met" ? (
+                  <>Jouw inflatie ligt dicht bij het CBS-gemiddelde.</>
+                ) : (
+                  <>
+                    Je hebt een{" "}
+                    <strong
+                      className={
+                        compare === "boven" ? "text-neg" : "text-pos"
+                      }
+                    >
+                      {compare === "boven" ? "hogere" : "lagere"}
+                    </strong>{" "}
+                    inflatie dan het gemiddelde
+                    {top1 && (
+                      <>
+                        , vooral door je aandeel in <strong>{top1}</strong>
+                        {top2 ? (
+                          <>
+                            {" "}en <strong>{top2}</strong>
+                          </>
+                        ) : null}
+                      </>
+                    )}
+                    .
+                  </>
+                )}
+              </div>
             </div>
-            <ComparisonBars personal={personal} reference={REFERENCE_INFLATION} />
-            <div className="mt-[18px] border-t border-border pt-4 text-[13px] leading-[1.55] text-ink-2">
-              {compare === "vergelijkbaar met" ? (
-                <>Jouw inflatie ligt dicht bij het CBS-gemiddelde.</>
-              ) : (
-                <>
-                  Je hebt een{" "}
-                  <strong
-                    className={
-                      compare === "boven" ? "text-neg" : "text-pos"
-                    }
-                  >
-                    {compare === "boven" ? "hogere" : "lagere"}
-                  </strong>{" "}
-                  inflatie dan het gemiddelde
-                  {top1 && (
-                    <>
-                      , vooral door je aandeel in <strong>{top1}</strong>
-                      {top2 ? (
-                        <>
-                          {" "}en <strong>{top2}</strong>
-                        </>
-                      ) : null}
-                    </>
-                  )}
-                  .
-                </>
-              )}
-            </div>
-          </div>
+          )}
         </div>
       </section>
 

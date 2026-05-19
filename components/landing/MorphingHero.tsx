@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+// Decorative cycle of "different people, different inflation rates" — not a
+// CBS claim. The CBS-gemiddelde line below is sourced live from props.
 const VALUES = [3.5, 4.8, 2.1, 5.6, 3.2, 4.1, 2.7, 6.0];
 
 function formatNl(n: number): string {
@@ -11,7 +13,16 @@ function formatNl(n: number): string {
   });
 }
 
-export function MorphingHero() {
+interface MorphingHeroProps {
+  /**
+   * Most recent CBS headline (T001112) in percent. `null` when unavailable
+   * (CBS down at build time and no mock fallback) — the CBS-gemiddelde line
+   * is hidden in that case rather than showing a misleading number.
+   */
+  cbsHeadline: number | null;
+}
+
+export function MorphingHero({ cbsHeadline }: MorphingHeroProps) {
   const [idx, setIdx] = useState(1);
   const [animValue, setAnimValue] = useState(VALUES[1]);
 
@@ -82,10 +93,14 @@ export function MorphingHero() {
             );
           })}
         </div>
-        <div className="mt-6 flex items-baseline justify-between border-t border-border pt-[22px] text-[13px] text-ink-3">
-          <span>CBS-gemiddelde</span>
-          <span className="font-mono text-sm text-ink-1">3,5&nbsp;%</span>
-        </div>
+        {cbsHeadline !== null && (
+          <div className="mt-6 flex items-baseline justify-between border-t border-border pt-[22px] text-[13px] text-ink-3">
+            <span>CBS-gemiddelde</span>
+            <span className="font-mono text-sm text-ink-1">
+              {formatNl(cbsHeadline)}&nbsp;%
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

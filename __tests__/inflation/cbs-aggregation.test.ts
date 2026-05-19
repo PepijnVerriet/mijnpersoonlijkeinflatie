@@ -16,6 +16,10 @@ function provider(
       if (!rates) throw new CbsDataNotAvailableError(month);
       return rates as CategoryRates;
     },
+    // Not exercised by these tests — getWeightedCbsRate only uses rates.
+    async getMonthlyHeadline(month: string): Promise<number> {
+      throw new CbsDataNotAvailableError(month);
+    },
   };
 }
 
@@ -116,6 +120,9 @@ describe("getWeightedCbsRate", () => {
   it("re-throws non-CBS errors instead of swallowing them", async () => {
     const cbs: CbsInflationProvider = {
       async getMonthlyRates() {
+        throw new Error("network kaboom");
+      },
+      async getMonthlyHeadline() {
         throw new Error("network kaboom");
       },
     };

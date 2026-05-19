@@ -67,7 +67,10 @@ describe("inflation (integration, test-data/rabobank-2025-04.pdf)", () => {
     expect(inflation.monthsIncluded).toContain("2025-04");
   });
 
-  it("does not surface a referenceInflation in v1", () => {
-    expect(inflation.referenceInflation).toBeUndefined();
+  it("surfaces the CBS headline as referenceInflation", () => {
+    // Statement is 2025-04 only → headline equals that single month's value.
+    // Echte CBS-waarde voor 2025-04 = 4.0 (mock-headlines.json bevat de
+    // werkelijke historische cijfers).
+    expect(inflation.referenceInflation).toBeCloseTo(4.0, 6);
   });
 });

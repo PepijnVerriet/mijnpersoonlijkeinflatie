@@ -49,4 +49,16 @@ describe("GET /api/cbs", () => {
     const body = (await res.json()) as { error: string };
     expect(body.error).toMatch(/2099-12/);
   });
+
+  it("includes the CBS headline (T001112) in the response when available", async () => {
+    const res = await GET(makeRequest("?month=2025-04"));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      month: string;
+      rates: Record<string, number>;
+      headline: number | null;
+    };
+    // 2025-04 is in mock-headlines.json with the real CBS value 4.0.
+    expect(body.headline).toBe(4.0);
+  });
 });

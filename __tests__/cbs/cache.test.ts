@@ -26,24 +26,45 @@ describe("InMemoryCbsCache", () => {
 
   it("returns the stored value when fresh", () => {
     const cache = new InMemoryCbsCache();
-    cache.put("2026-03", SAMPLE_RATES);
+    cache.put("2026-03", SAMPLE_RATES, null);
     expect(cache.getFresh("2026-03")).toEqual(SAMPLE_RATES);
   });
 
   it("expires entries after the TTL", () => {
     const cache = new InMemoryCbsCache(1000);
-    cache.put("2026-03", SAMPLE_RATES);
+    cache.put("2026-03", SAMPLE_RATES, null);
     vi.advanceTimersByTime(1001);
     expect(cache.getFresh("2026-03")).toBeNull();
   });
 
   it("returns a defensive copy (caller mutation does not poison cache)", () => {
     const cache = new InMemoryCbsCache();
-    cache.put("2026-03", SAMPLE_RATES);
+    cache.put("2026-03", SAMPLE_RATES, null);
     const a = cache.getFresh("2026-03")!;
     a["01"] = 999;
     const b = cache.getFresh("2026-03")!;
     expect(b["01"]).toBe(SAMPLE_RATES["01"]);
+  });
+
+  it("stores and returns the headline alongside rates", () => {
+    const cache = new InMemoryCbsCache();
+    cache.put("2026-03", SAMPLE_RATES, 2.7);
+    expect(cache.getFreshHeadline("2026-03")).toBe(2.7);
+  });
+
+  it("returns null headline for an unknown month or a null-headline entry", () => {
+    const cache = new InMemoryCbsCache();
+    expect(cache.getFreshHeadline("2026-03")).toBeNull();
+    cache.put("2026-03", SAMPLE_RATES, null);
+    expect(cache.getFreshHeadline("2026-03")).toBeNull();
+  });
+
+  it("expires headline together with rates after the TTL", () => {
+    const cache = new InMemoryCbsCache(1000);
+    cache.put("2026-03", SAMPLE_RATES, 2.7);
+    expect(cache.getFreshHeadline("2026-03")).toBe(2.7);
+    vi.advanceTimersByTime(1001);
+    expect(cache.getFreshHeadline("2026-03")).toBeNull();
   });
 });
 
@@ -69,7 +90,7 @@ describe("JsonFileCbsCache", () => {
 
   it("persists writes across separate instances", () => {
     const writer = new JsonFileCbsCache(path);
-    writer.put("2026-03", SAMPLE_RATES);
+    writer.put("2026-03", SAMPLE_RATES, null);
     const reader = new JsonFileCbsCache(path);
     expect(reader.getFresh("2026-03")).toEqual(SAMPLE_RATES);
   });
@@ -85,10 +106,17 @@ describe("JsonFileCbsCache", () => {
 
   it("respects TTL on read", () => {
     const cache = new JsonFileCbsCache(path, 1000);
-    cache.put("2026-03", SAMPLE_RATES);
+    cache.put("2026-03", SAMPLE_RATES, null);
     expect(cache.getFresh("2026-03")).toEqual(SAMPLE_RATES);
     vi.advanceTimersByTime(1001);
     expect(cache.getFresh("2026-03")).toBeNull();
+  });
+
+  it("persists the headline across separate instances", () => {
+    const writer = new JsonFileCbsCache(path);
+    writer.put("2026-03", SAMPLE_RATES, 2.7);
+    const reader = new JsonFileCbsCache(path);
+    expect(reader.getFreshHeadline("2026-03")).toBe(2.7);
   });
 
   it("does not throw when disk writes fail (read-only FS, Vercel)", () => {
@@ -102,13 +130,13 @@ describe("JsonFileCbsCache", () => {
     const cache = new JsonFileCbsCache(unwritablePath);
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    expect(() => cache.put("2026-03", SAMPLE_RATES)).not.toThrow();
+    expect(() => cache.put("2026-03", SAMPLE_RATES, null)).not.toThrow();
     // In-memory state must still reflect the put.
     expect(cache.getFresh("2026-03")).toEqual(SAMPLE_RATES);
     expect(warnSpy).toHaveBeenCalledOnce();
 
     // Second failed put must NOT warn again (writesDisabled latches).
-    cache.put("2026-04", SAMPLE_RATES);
+    cache.put("2026-04", SAMPLE_RATES, null);
     expect(cache.getFresh("2026-04")).toEqual(SAMPLE_RATES);
     expect(warnSpy).toHaveBeenCalledOnce();
 
