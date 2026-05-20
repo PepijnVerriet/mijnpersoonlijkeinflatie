@@ -111,6 +111,12 @@ export function StepResult({
   const diff = hasReference ? personal - reference : 0;
   const compare = hasReference ? compareLabel(personal, reference) : null;
   const periodMonths = calculation.monthsIncluded;
+  const periodLabel =
+    periodMonths.length === 0
+      ? "deze periode"
+      : periodMonths.length === 1
+        ? fmtMonth(periodMonths[0])
+        : `${fmtMonth(periodMonths[0])} t/m ${fmtMonth(periodMonths[periodMonths.length - 1])}`;
   const top = [...calculation.breakdown]
     .sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution))
     .filter((b) => Math.abs(b.weight) > 0.001);
@@ -272,7 +278,7 @@ export function StepResult({
             </div>
             <div>
               <div className="font-serif text-[22px] font-medium tabular-nums tracking-[-0.02em] text-ink-1">
-                {calculation.categoriesUsed} / 12
+                {calculation.categoriesUsed} / 13
               </div>
               <div className="mt-1 text-[12px] text-ink-3">
                 CBS-categorieën gevuld
@@ -328,6 +334,12 @@ export function StepResult({
                 niet mee in het inflatiecijfer.
               </p>
             )}
+            <p className="m-0">
+              Dit cijfer geldt voor <strong>{periodLabel}</strong>. Een andere
+              upload-periode geeft een andere uitkomst, want de Nederlandse
+              inflatie verschilt per maand, en we vergelijken elke maand met
+              diezelfde maand een jaar eerder.
+            </p>
             <p className="m-0 text-ink-3">
               Dit is een benadering, geen officieel cijfer. Eenmalige aankopen,
               seizoenseffecten en vaste lasten kunnen het beeld vertekenen.

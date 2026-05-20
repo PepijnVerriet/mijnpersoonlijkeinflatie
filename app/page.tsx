@@ -77,8 +77,8 @@ const STEPS: Array<{ n: string; t: string; d: string; meta: string }> = [
   {
     n: "02",
     t: "AI categoriseert",
-    d: "Elke transactie wordt automatisch in één van twaalf CBS-categorieën geplaatst. Onbekende handelaars markeren we voor jouw controle.",
-    meta: "COICOP-12 · ±3 % handmatig",
+    d: "Elke transactie wordt automatisch in één van dertien CBS-categorieën geplaatst. Onbekende handelaars markeren we voor jouw controle.",
+    meta: "COICOP-2018 · ±3 % handmatig",
   },
   {
     n: "03",
@@ -120,7 +120,7 @@ export default async function Home() {
           <div>
             <div className="mb-6">
               <Badge tone="accent" dot>
-                {headline ? `${fmtMonthYear(headline.month)} · CBS COICOP-12` : "CBS COICOP-12"}
+                {headline ? `${fmtMonthYear(headline.month)} · CBS COICOP-2018` : "CBS COICOP-2018"}
               </Badge>
             </div>
             <h1 className="m-0 mb-[22px] font-serif text-[42px] font-medium leading-[1.02] tracking-[-0.025em] text-ink-1 text-balance md:text-[68px]">
@@ -143,16 +143,16 @@ export default async function Home() {
               Upload je bankafschrift en bereken het cijfer dat{" "}
               <em className="italic">jij</em> betaalt.
             </p>
-            <div className="flex flex-wrap items-center gap-3">
+            <div>
               <Link
                 href="/check"
                 className="inline-flex h-[50px] items-center justify-center gap-2 whitespace-nowrap rounded-token-sm border border-transparent bg-accent px-6 text-[15px] font-medium tracking-[-0.005em] text-accent-on no-underline transition-colors hover:bg-accent-hover active:translate-y-[0.5px]"
               >
                 Bereken je inflatie <ArrowIcon size={14} />
               </Link>
-              <span className="inline-flex items-center gap-1.5 text-[13px] text-ink-3">
-                <LockIcon size={12} /> Geen account · niets opgeslagen · 2&nbsp;min
-              </span>
+              <p className="m-0 mt-3 text-[13px] text-ink-3">
+                Gratis · Geen account · 2 minuten
+              </p>
             </div>
           </div>
 
@@ -278,7 +278,7 @@ export default async function Home() {
                   CBS-jaarmutatie per categorie
                 </div>
                 <div>
-                  <span className="font-mono">i</span> = 12 COICOP-categorieën
+                  <span className="font-mono">i</span> = 13 COICOP-categorieën
                 </div>
               </div>
             </div>
@@ -306,6 +306,9 @@ export default async function Home() {
             >
               Bereken je inflatie <ArrowIcon size={14} />
             </Link>
+            <p className="m-0 mt-3 text-[13px] text-ink-3">
+              Gratis · Geen account · 2 minuten
+            </p>
           </div>
         </section>
       </main>
