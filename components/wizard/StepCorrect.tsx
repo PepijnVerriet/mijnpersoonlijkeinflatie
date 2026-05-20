@@ -1,21 +1,26 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { ArrowIcon, CheckIcon, SparkIcon, WarnIcon } from "@/components/ui/icons";
+import { ArrowIcon, CheckIcon, SparkIcon, WarnIcon, XIcon } from "@/components/ui/icons";
 import { CATEGORIES, getCategory } from "@/lib/cbs/categories";
 import type { CategoryCode } from "@/lib/cbs/types";
-import type { ProcessResult, ProcessTransaction } from "@/lib/wizard/types";
+import { splitUnknowns } from "@/lib/wizard/correct-filters";
+import type { ProcessResult } from "@/lib/wizard/types";
 import { Spinner } from "./Spinner";
 
 interface StepCorrectProps {
   result: ProcessResult;
-  /** IDs the user has excluded on Review; we skip them here entirely. */
+  /**
+   * IDs the user has excluded. Shown here too (dimmed) so the user can
+   * toggle them back in without leaving the screen.
+   */
   excludedTransactionIds: ReadonlySet<string>;
   suggestionsLoading: boolean;
   suggestionsFallback: boolean;
   userCategories: Record<string, CategoryCode>;
   submitting: boolean;
   onChange: (id: string, category: CategoryCode) => void;
+  onToggleExclusion: (transactionId: string) => void;
   onBack: () => void;
   onSubmit: () => void;
 }
@@ -34,15 +39,6 @@ function fmtAmount(n: number): string {
   });
 }
 
-function unknownTransactions(
-  result: ProcessResult,
-  excludedTransactionIds: ReadonlySet<string>,
-): ProcessTransaction[] {
-  return result.transactions.filter(
-    (t) => t.category === null && !excludedTransactionIds.has(t.id),
-  );
-}
-
 export function StepCorrect({
   result,
   excludedTransactionIds,
@@ -51,18 +47,24 @@ export function StepCorrect({
   userCategories,
   submitting,
   onChange,
+  onToggleExclusion,
   onBack,
   onSubmit,
 }: StepCorrectProps) {
-  const unknowns = unknownTransactions(result, excludedTransactionIds);
+  const { allUnknowns, activeUnknowns, excludedUnknowns } = splitUnknowns(
+    result,
+    excludedTransactionIds,
+  );
   const totalCount = result.transactionCount;
-  const unknownSpending = unknowns.reduce((s, t) => s + t.amount, 0);
+  const unknownSpending = activeUnknowns.reduce((s, t) => s + t.amount, 0);
   const totalSpending = result.transactions.reduce((s, t) => s + t.amount, 0);
   const sharePct =
     totalSpending > 0 ? (unknownSpending / totalSpending) * 100 : 0;
-  const decidedCount = unknowns.filter((t) => userCategories[t.id]).length;
+  const decidedCount = activeUnknowns.filter((t) => userCategories[t.id]).length;
+  const excludedEur = excludedUnknowns.reduce((s, t) => s + t.amount, 0);
+  const allExcluded = activeUnknowns.length === 0 && allUnknowns.length > 0;
 
-  if (unknowns.length === 0) {
+  if (allUnknowns.length === 0) {
     return (
       <section className="mx-auto max-w-[720px] px-[22px] py-12 md:px-12 md:py-20">
         <div className="rounded-token-lg border border-border bg-surface p-8 text-center md:p-12">
@@ -100,26 +102,58 @@ export function StepCorrect({
           <span className="text-[11.5px] font-medium uppercase tracking-[0.12em] text-ink-3">
             Laatste stap voor je cijfer
           </span>
-          <h1 className="m-0 mb-2.5 mt-2.5 font-serif text-[30px] font-medium tracking-[-0.02em] text-ink-1 md:text-[40px]">
-            Help ons met de laatste {unknowns.length}{" "}
-            {unknowns.length === 1 ? "transactie" : "transacties"}
-          </h1>
-          <p className="m-0 max-w-[640px] text-sm leading-[1.55] text-ink-2">
-            Goed voor {sharePct.toFixed(1)}% van je uitgaven (
-            {fmtAmount(unknownSpending)}). We hebben een gokje gewaagd — kies de
-            juiste categorie en we gaan rekenen.
-          </p>
+          {allExcluded ? (
+            <>
+              <h1 className="m-0 mb-2.5 mt-2.5 font-serif text-[30px] font-medium tracking-[-0.02em] text-ink-1 md:text-[40px]">
+                Je hebt alle te corrigeren transacties uitgesloten
+              </h1>
+              <p className="m-0 max-w-[640px] text-sm leading-[1.55] text-ink-2">
+                Klik op <strong className="font-medium">Bereken</strong> om verder
+                te gaan, of zet er hieronder weer een aan.
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="m-0 mb-2.5 mt-2.5 font-serif text-[30px] font-medium tracking-[-0.02em] text-ink-1 md:text-[40px]">
+                Help ons met de laatste {activeUnknowns.length}{" "}
+                {activeUnknowns.length === 1 ? "transactie" : "transacties"}
+              </h1>
+              <p className="m-0 max-w-[640px] text-sm leading-[1.55] text-ink-2">
+                Goed voor {sharePct.toFixed(1)}% van je uitgaven (
+                {fmtAmount(unknownSpending)}). We hebben een gokje gewaagd — kies
+                de juiste categorie en we gaan rekenen.
+              </p>
+            </>
+          )}
         </div>
         <div className="text-right font-mono text-[12.5px] text-ink-3">
-          {decidedCount} / {unknowns.length} gekozen
+          {decidedCount} / {activeUnknowns.length} gekozen
         </div>
       </div>
+
+      {excludedUnknowns.length > 0 && (
+        <div className="mt-3 flex items-center gap-2 text-[12.5px] text-ink-3">
+          <XIcon size={11} />
+          <span>
+            <strong className="font-medium text-ink-2">
+              {excludedUnknowns.length}
+            </strong>{" "}
+            {excludedUnknowns.length === 1 ? "transactie" : "transacties"}{" "}
+            uitgesloten
+            <span className="mx-1.5 text-ink-4">·</span>
+            <strong className="font-medium tabular-nums text-ink-2">
+              {fmtAmount(excludedEur)}
+            </strong>{" "}
+            niet meegenomen
+          </span>
+        </div>
+      )}
 
       {suggestionsLoading && (
         <div className="mt-6 flex items-center gap-3 rounded-token border border-accent-soft bg-accent-soft/60 px-4 py-3">
           <Spinner
-            label={`AI doet suggesties voor ${unknowns.length} ${
-              unknowns.length === 1 ? "transactie" : "transacties"
+            label={`AI doet suggesties voor ${activeUnknowns.length} ${
+              activeUnknowns.length === 1 ? "transactie" : "transacties"
             }…`}
           />
         </div>
@@ -140,9 +174,10 @@ export function StepCorrect({
       )}
 
       <div className="mt-7 grid gap-2">
-        {unknowns.map((t) => {
+        {allUnknowns.map((t) => {
           const chosen = userCategories[t.id] ?? "12";
           const label = t.merchant ?? t.description.slice(0, 80);
+          const excluded = excludedTransactionIds.has(t.id);
           const aiCat = (() => {
             try {
               return getCategory(chosen).shortName;
@@ -153,9 +188,13 @@ export function StepCorrect({
           return (
             <div
               key={t.id}
-              className="grid grid-cols-1 items-center gap-3 rounded-token border border-border bg-surface p-4 md:grid-cols-[1fr_auto] md:gap-6 md:p-5"
+              className="grid grid-cols-1 items-center gap-3 rounded-token border border-border bg-surface p-4 md:grid-cols-[1fr_auto_auto] md:gap-4 md:p-5"
             >
-              <div className="min-w-0">
+              <div
+                className={`min-w-0 ${
+                  excluded ? "opacity-50 line-through" : ""
+                }`}
+              >
                 <div className="mb-1.5 flex flex-wrap items-baseline gap-2.5">
                   <span className="text-[14.5px] font-medium text-ink-1">
                     {label}
@@ -178,7 +217,9 @@ export function StepCorrect({
                 disabled={suggestionsLoading || submitting}
                 onChange={(e) => onChange(t.id, e.target.value as CategoryCode)}
                 aria-label={`Categorie voor ${label}`}
-                className="w-full min-w-0 rounded-token-sm border border-border-strong bg-surface px-3.5 py-2.5 font-sans text-[13.5px] text-ink-1 transition-colors hover:border-accent focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft disabled:cursor-not-allowed disabled:bg-surface-2 md:w-[240px]"
+                className={`w-full min-w-0 rounded-token-sm border border-border-strong bg-surface px-3.5 py-2.5 font-sans text-[13.5px] text-ink-1 transition-colors hover:border-accent focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft disabled:cursor-not-allowed disabled:bg-surface-2 md:w-[240px] ${
+                  excluded ? "opacity-50" : ""
+                }`}
               >
                 {CATEGORIES.map((c) => (
                   <option key={c.code} value={c.code}>
@@ -186,6 +227,28 @@ export function StepCorrect({
                   </option>
                 ))}
               </select>
+              <button
+                type="button"
+                onClick={() => onToggleExclusion(t.id)}
+                title={
+                  excluded
+                    ? "Toon weer in berekening"
+                    : "Sluit uit van berekening"
+                }
+                aria-label={
+                  excluded
+                    ? "Toon weer in berekening"
+                    : "Sluit uit van berekening"
+                }
+                aria-pressed={excluded}
+                className={`grid h-7 w-7 place-items-center justify-self-end rounded-md transition-colors ${
+                  excluded
+                    ? "bg-surface-2 text-ink-1"
+                    : "text-ink-3 hover:bg-surface-2 hover:text-ink-1"
+                }`}
+              >
+                <XIcon size={12} />
+              </button>
             </div>
           );
         })}

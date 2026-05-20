@@ -231,22 +231,33 @@ Modulair opgebouwd in losse, onafhankelijke modules:
     - 6b-4: calculate-route filtering
     - 6b-5: Resultaat transparantie-blok
     - 6b-6: tests + walkthrough
+    - 6b-7 (post-launch): toggle ook op Correct-scherm. Uitgesloten 
+      unknowns blijven zichtbaar maar gedimd; counters en share-% 
+      gebruiken alleen actieve unknowns; empty-state triggert pas als 
+      er geen unknowns meer zijn (excluded of niet).
     
     UX-keuzes:
     - Toggle per rij, klik = uit, klik weer = in
     - Visueel markeren met doorgestreept/grijs (transactie blijft zichtbaar)
-    - Alleen op Review-scherm (Correct toont uitgesloten niet meer)
+    - Toggle op zowel Review als Correct (uitgesloten unknowns op Correct 
+      worden gedimd getoond zodat user ze kan terugzetten zonder terug 
+      te navigeren)
     - Transparantie-blok op Resultaat toont aantal + euro uitgesloten
 
     Handmatige walkthrough (na wijzigingen aan 6b-codepaden):
     - A. Refresh `/check`, upload, op Review sluit 3 transacties uit
     - B. Counter op "Categoriseer N…" zakt met 3; doorklikken naar 
-      Correct — uitgesloten transacties zijn weg uit de lijst
+      Correct — uitgesloten transacties die unknown zijn worden gedimd 
+      getoond (niet weggefilterd)
     - C. Door naar Resultaat — transparantie-blok toont 
       "Je hebt zelf 3 transacties uitgesloten (€X)"
     - D. Terug-knop naar Review → uitsluitingen blijven gemarkeerd
     - E. Sluit ALLE transacties uit → Resultaat-scherm toont 422 error, 
       terug-knop herstelt
+    - F. Op Correct: sluit een unknown uit via de x-knop → tekst dimt 
+      met line-through, counter "N gekozen" zakt, summary-regel boven 
+      tabel verschijnt. Klik weer aan → rij herstelt, counter klimt 
+      terug, summary verdwijnt zodra geen excluded unknowns over zijn.
 38. Privacy-claims (na data-flow audit):
     - PDF: in-memory verwerking, geen disk-write
     - AI: stuurt counterpartyName + raw description naar Anthropic

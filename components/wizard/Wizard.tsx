@@ -361,6 +361,9 @@ export function Wizard() {
           onChange={(id, category) =>
             dispatch({ type: "UPDATE_USER_CATEGORY", id, category })
           }
+          onToggleExclusion={(transactionId) =>
+            dispatch({ type: "TOGGLE_EXCLUSION", transactionId })
+          }
           onBack={() => dispatch({ type: "GO_TO_STEP", step: "review" })}
           onSubmit={handleSubmitCorrections}
         />
