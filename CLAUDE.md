@@ -267,6 +267,14 @@ Modulair opgebouwd in losse, onafhankelijke modules:
     - Anthropic retentie: 30 dagen standaard, geen training
     - CBS Open Data: anoniem fetch, geen identificatie van eindgebruiker
 
+39. Share-feature: outbound share-URLs (LinkedIn/WhatsApp/X target en
+    og:image in /share-metadata) gebruiken hardcoded SHARE_BASE_URL =
+    "https://mijnpersoonlijkeinflatie.nl". OG-image-fetch via Download-
+    chip en Web Share file-blob gebruiken runtime-origin (window.location).
+    Reden: outbound shares moeten publiek bereikbaar zijn voor scrapers
+    en ontvangers; lokale ontwikkeling moet tegen de huidige code-render
+    werken, niet tegen prod-cache.
+
 \## Werkstroom
 
 
@@ -317,6 +325,16 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - Module 6: AF, hele uitsluit-feature gedeployd
 - Pre-launch: Privacy-pagina + landing-page fix + corrections-log uitschakelen → AF, gecommit (baseline 275/0)
 - GitHub repo + Vercel deployment + domain hookup → BEZIG
+- Module 7: Deel-feature → AF (5 commits, baseline 373/0)
+  - 7a: share-helpers + URL/text builders → AF, gecommit
+  - 7b: /api/og PNG-route + Source Serif 4 WOFF bundle (@vercel/og)
+    → AF, gecommit
+  - 7c: /share page met dynamische OG-meta + meta-refresh redirect
+    → AF, gecommit
+  - 7d: ShareSection UI op Resultaat-scherm + Web Share API +
+    viewport-detectie (mobiel: Deel+Download; desktop: 4 chips)
+    → AF, gecommit
+  - 7e: CLAUDE.md status-update → AF, gecommit (deze commit)
 
 
 
@@ -329,8 +347,15 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - **OneDrive issue**: projectmap verplaatsen naar `C:\Dev\` voor schone 
   werkomgeving (OneDrive-sync veroorzaakt soms file-lock issues op 
   node_modules / .next bij dev)
-- Optioneel voor v2: "Deel je inflatie" knop activeren (nu placeholder 
-  met alert)
+- v2: /share page eigen layout zonder Topbar/Footer voor een schonere
+  redirect (nu wordt root layout volledig gerenderd voordat de meta-
+  refresh kicked in; op trage devices een korte flash zichtbaar)
+- v2: Web Share API files niet universeel ondersteund (sommige Android-
+  browsers negeren files). Huidige fallback: share zonder file. Pas aan
+  als feedback komt dat shares geen preview tonen.
+- v2: brand-iconen zijn nu stilistisch in eigen huisstijl. Mocht
+  herkenbaarheid een issue worden, overstappen op officiële brand-SVGs
+  (vergt attributie nakijken in respectievelijke brand guidelines)
 - v2 optimalisatie: negative cache binnen calculate-scope om 13× 
   fallback-latency bij CBS-storing te voorkomen. Nu wordt bij elke 
   categorie binnen één request opnieuw geprobeerd live te halen.
@@ -383,3 +408,18 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
   alleen op naamherkenning. Voorbeeld: "Total Hambake" leek aanvankelijk 
   een horecagelegenheid, bleek een TotalEnergies-tankstation op een 
   bedrijventerrein.
+
+- Satori (de renderer in @vercel/og) heeft een strikt CSS-subset:
+  elke container met >1 child node moet expliciet display: flex (of
+  display: none) zetten — JSX-fragmenten zoals "over {label}" tellen
+  als 2 children en breken default. Workaround: combineer met
+  template-literals tot één expressie. Unicode-glyphs die niet in
+  de gebundelde font zitten (bijv. ▲ in Source Serif 4) renderen
+  als tofu — gebruik inline SVG voor symbolen.
+
+- Source Serif 4 TTFs niet rechtstreeks fetchbaar van Adobe's repo:
+  jsDelivr blokkeert >50MB repos, raw.githubusercontent.com geeft
+  404 op de TTF-bestanden. Werkwijze: tijdelijk installeer
+  @fontsource/source-serif-4 → kopieer de twee benodigde WOFF-files
+  (Latin 500 normal + italic) naar app/api/og/fonts/ → uninstall de
+  fontsource-package. Satori ondersteunt WOFF, dus geen TTF nodig.
