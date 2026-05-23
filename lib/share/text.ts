@@ -89,6 +89,27 @@ export function buildShareSentence(params: ShareParams): string {
   return `Mijn inflatie over ${periodLabel} was ${personalStr}%. Bereken jouw inflatie:`;
 }
 
+export function buildOgTitle(params: ShareParams): string {
+  const personalStr = formatNumberNl(params.personal);
+  if (params.monthsIncluded.length === 0) {
+    return `Mijn persoonlijke inflatie: ${personalStr}%`;
+  }
+  return `Mijn inflatie over ${formatPeriodLabel(params.monthsIncluded)}: ${personalStr}%`;
+}
+
+export function buildOgDescription(params: ShareParams): string {
+  if (params.reference === undefined) {
+    return "Bereken je eigen inflatie op basis van je Rabobank-afschrift en CBS-cijfers via mijnpersoonlijkeinflatie.nl.";
+  }
+  const refStr = formatNumberNl(params.reference);
+  const diff = params.personal - params.reference;
+  if (Math.abs(diff) < 0.3) {
+    return `Vergelijkbaar met het Nederlandse gemiddelde van ${refStr}%. Bereken jouw eigen inflatie via mijnpersoonlijkeinflatie.nl.`;
+  }
+  const direction = diff > 0 ? "hoger" : "lager";
+  return `${formatNumberNl(Math.abs(diff))} procentpunt ${direction} dan het Nederlandse gemiddelde (${refStr}%). Bereken jouw eigen inflatie via mijnpersoonlijkeinflatie.nl.`;
+}
+
 function applyShareParams(url: URL, params: ShareParams): URL {
   url.searchParams.set("personal", params.personal.toFixed(2));
   if (params.reference !== undefined) {

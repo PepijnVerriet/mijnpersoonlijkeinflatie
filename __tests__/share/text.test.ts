@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   buildLinkedInUrl,
+  buildOgDescription,
   buildOgImageUrl,
+  buildOgTitle,
   buildShareSentence,
   buildShareTargetUrl,
   buildWhatsAppUrl,
@@ -213,6 +215,65 @@ describe("buildXUrl", () => {
     const sentence = "Mijn inflatie was 3,42%.";
     expect(buildXUrl(target, sentence)).toBe(
       "https://twitter.com/intent/tweet?text=Mijn+inflatie+was+3%2C42%25.&url=https%3A%2F%2Fmijnpersoonlijkeinflatie.nl%2Fshare%3Fpersonal%3D3.42",
+    );
+  });
+});
+
+describe("buildOgTitle", () => {
+  it("includes the period label when months are available", () => {
+    expect(buildOgTitle(paramsFixture())).toBe(
+      "Mijn inflatie over maart 2026: 3,42%",
+    );
+  });
+
+  it("formats multi-month ranges", () => {
+    const out = buildOgTitle(
+      paramsFixture({ monthsIncluded: ["2026-01", "2026-02", "2026-03"] }),
+    );
+    expect(out).toBe("Mijn inflatie over januari 2026 t/m maart 2026: 3,42%");
+  });
+
+  it("falls back to a generic title when no months are given", () => {
+    expect(buildOgTitle(paramsFixture({ monthsIncluded: [] }))).toBe(
+      "Mijn persoonlijke inflatie: 3,42%",
+    );
+  });
+
+  it("preserves a negative value with a minus sign", () => {
+    expect(buildOgTitle(paramsFixture({ personal: -0.5 }))).toBe(
+      "Mijn inflatie over maart 2026: -0,50%",
+    );
+  });
+});
+
+describe("buildOgDescription", () => {
+  it("frames the difference as 'hoger' when personal exceeds reference by >=0.3pp", () => {
+    expect(buildOgDescription(paramsFixture())).toBe(
+      "0,72 procentpunt hoger dan het Nederlandse gemiddelde (2,70%). Bereken jouw eigen inflatie via mijnpersoonlijkeinflatie.nl.",
+    );
+  });
+
+  it("frames the difference as 'lager' for a negative gap", () => {
+    expect(
+      buildOgDescription(paramsFixture({ personal: -0.5, reference: 2.7 })),
+    ).toBe(
+      "3,20 procentpunt lager dan het Nederlandse gemiddelde (2,70%). Bereken jouw eigen inflatie via mijnpersoonlijkeinflatie.nl.",
+    );
+  });
+
+  it("uses the 'vergelijkbaar' frame when the gap is smaller than 0,3pp", () => {
+    expect(
+      buildOgDescription(paramsFixture({ personal: 2.85, reference: 2.7 })),
+    ).toBe(
+      "Vergelijkbaar met het Nederlandse gemiddelde van 2,70%. Bereken jouw eigen inflatie via mijnpersoonlijkeinflatie.nl.",
+    );
+  });
+
+  it("falls back to a generic description when no reference is available", () => {
+    expect(
+      buildOgDescription(paramsFixture({ reference: undefined })),
+    ).toBe(
+      "Bereken je eigen inflatie op basis van je Rabobank-afschrift en CBS-cijfers via mijnpersoonlijkeinflatie.nl.",
     );
   });
 });
