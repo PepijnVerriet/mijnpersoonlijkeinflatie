@@ -13,6 +13,7 @@ import {
   formatMonthNl,
   formatNumberNl,
   formatPeriodLabel,
+  SHARE_BASE_URL,
   type ShareParams,
 } from "@/lib/share/text";
 
@@ -243,6 +244,15 @@ describe("buildOgTitle", () => {
     expect(buildOgTitle(paramsFixture({ personal: -0.5 }))).toBe(
       "Mijn inflatie over maart 2026: -0,50%",
     );
+  });
+});
+
+describe("SHARE_BASE_URL", () => {
+  it("is the public production origin (never localhost)", () => {
+    // This constant feeds into every outbound share-URL. Drift here means
+    // shared LinkedIn / WhatsApp / X posts point at a Vercel preview or
+    // localhost; recipients can't open them.
+    expect(SHARE_BASE_URL).toBe("https://mijnpersoonlijkeinflatie.nl");
   });
 });
 

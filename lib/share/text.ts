@@ -1,4 +1,17 @@
 /**
+ * Hardcoded public origin for outbound share-URLs (LinkedIn, WhatsApp, X,
+ * Web Share API). These URLs are posted to social networks and must be
+ * reachable by anyone — `window.location.origin` would yield localhost or
+ * a Vercel preview URL during dev, which scrapers and recipients cannot
+ * resolve.
+ *
+ * The OG-image URL used for the local Download chip stays on the runtime
+ * origin (see ShareSection) so dev builds download the version of the
+ * card rendered by the *current* code, not whatever prod has cached.
+ */
+export const SHARE_BASE_URL = "https://mijnpersoonlijkeinflatie.nl";
+
+/**
  * Pure helpers for building share text and URLs used by the Resultaat-scherm
  * share-section, the /share page (OG-meta target), and the /api/og PNG route.
  *

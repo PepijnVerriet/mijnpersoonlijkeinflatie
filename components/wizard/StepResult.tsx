@@ -2,16 +2,18 @@
 
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { ArrowIcon } from "@/components/ui/icons";
 import { Footer } from "@/components/ui/Footer";
-import { ArrowIcon, RefreshIcon, ShareIcon } from "@/components/ui/icons";
 import { getCategory } from "@/lib/cbs/categories";
 import type { InflationCalculation } from "@/lib/inflation/types";
+import type { ShareParams } from "@/lib/share/text";
 import type { InflationMeta, ProcessResult } from "@/lib/wizard/types";
 import { BreakdownBars } from "./result/BreakdownBars";
 import { BreakdownTable } from "./result/BreakdownTable";
 import { CbsFallbackBanner } from "./result/CbsFallbackBanner";
 import { ComparisonBars } from "./result/ComparisonBars";
 import { HeroNumber } from "./result/HeroNumber";
+import { ShareSection } from "./result/ShareSection";
 import { Spinner } from "./Spinner";
 
 const NL_MONTHS = [
@@ -349,22 +351,18 @@ export function StepResult({
         </div>
       </section>
 
-      {/* =============== ACTIONS =============== */}
-      <section className="mx-auto flex max-w-[1180px] flex-wrap items-center justify-between gap-3 px-[22px] py-5 pb-8 md:px-12 md:py-4 md:pb-14">
-        <Button variant="secondary" onClick={onReset}>
-          <RefreshIcon size={13} /> Opnieuw beginnen
-        </Button>
-        <Button
-          variant="primary"
-          onClick={() =>
-            alert(
-              "Delen van je persoonlijke inflatie komt in een volgende sessie.",
-            )
-          }
-        >
-          <ShareIcon size={14} /> Deel je inflatie
-        </Button>
-      </section>
+      {/* =============== SHARE =============== */}
+      <ShareSection
+        params={
+          {
+            personal,
+            reference: hasReference ? reference : undefined,
+            monthsIncluded: periodMonths,
+            usingMockData: meta.usingMockData,
+          } satisfies ShareParams
+        }
+        onReset={onReset}
+      />
 
       <Footer />
     </>
