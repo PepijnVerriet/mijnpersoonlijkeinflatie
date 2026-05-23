@@ -13,12 +13,17 @@ export function Footer() {
         <Link href="#" className="text-ink-3 no-underline hover:text-ink-1">
           Bronnen (CBS)
         </Link>
-        <Link href="#" className="text-ink-3 no-underline hover:text-ink-1">
+        <a
+          href="https://www.linkedin.com/in/pepijn-verriet-2a6233159/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-ink-3 no-underline hover:text-ink-1"
+        >
           Contact
-        </Link>
+        </a>
       </div>
       <div className="text-left text-ink-4 md:text-right">
-        Onafhankelijke insight-tool · Geen officieel CBS-cijfer · v0.4
+        Onafhankelijke insight-tool · Geen officieel CBS-cijfer · v1.0
       </div>
     </footer>
   );

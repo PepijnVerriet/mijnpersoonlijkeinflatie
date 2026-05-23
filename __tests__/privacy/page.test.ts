@@ -9,8 +9,7 @@ import { describe, expect, it } from "vitest";
  * Rendering the component in vitest would require @vitejs/plugin-react,
  * which we deliberately don't pull in for one smoke test. Reading the
  * source as text catches the failures that actually matter (typo'd
- * section letters, accidental section removal, missing LinkedIn
- * placeholder for the launch follow-up commit).
+ * section letters, accidental section removal, LinkedIn URL regression).
  */
 const PRIVACY_PAGE_PATH = resolve(
   process.cwd(),
@@ -29,8 +28,11 @@ describe("/privacy page source", () => {
     }
   });
 
-  it("contains the LinkedIn placeholder marker (must be filled in before launch)", () => {
+  it("links to the live LinkedIn profile (no placeholder left)", () => {
     const text = readFileSync(PRIVACY_PAGE_PATH, "utf8");
-    expect(text).toContain("[LinkedIn URL invullen]");
+    expect(text).toContain(
+      "https://www.linkedin.com/in/pepijn-verriet-2a6233159/",
+    );
+    expect(text).not.toContain("[LinkedIn URL invullen]");
   });
 });

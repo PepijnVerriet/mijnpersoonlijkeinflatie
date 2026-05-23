@@ -130,10 +130,12 @@ export default function PrivacyPage() {
           <p className="m-0">
             Voor vragen of zorgen:{" "}
             <a
-              href="#"
+              href="https://www.linkedin.com/in/pepijn-verriet-2a6233159/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"
             >
-              [LinkedIn URL invullen]
+              LinkedIn
             </a>
           </p>
         </Section>
