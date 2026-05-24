@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRef, useState, type DragEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import {
@@ -11,6 +12,11 @@ import {
   XIcon,
 } from "@/components/ui/icons";
 import { Spinner } from "./Spinner";
+
+const RabobankExportVisual = dynamic(
+  () => import("./RabobankExportVisual"),
+  { ssr: false },
+);
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
@@ -47,6 +53,7 @@ export function StepUpload({
 }: StepUploadProps) {
   const [dragOver, setDragOver] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [showHowTo, setShowHowTo] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = (files: FileList | null) => {
@@ -153,6 +160,26 @@ export function StepUpload({
         <p role="alert" className="mt-3 text-sm text-neg">
           {localError}
         </p>
+      )}
+
+      {!file && (
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={() => setShowHowTo((s) => !s)}
+            aria-expanded={showHowTo}
+            className="text-[13.5px] text-accent underline underline-offset-2 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-accent-soft focus:ring-offset-2 rounded-sm"
+          >
+            {showHowTo
+              ? "Verberg uitleg"
+              : "Hoe download ik mijn Rabobank-afschrift?"}
+          </button>
+          {showHowTo && (
+            <div className="mt-4 overflow-hidden rounded-token border border-border bg-surface">
+              <RabobankExportVisual />
+            </div>
+          )}
+        </div>
       )}
 
       <div className="mt-[22px] grid grid-cols-1 gap-3 md:grid-cols-2">
