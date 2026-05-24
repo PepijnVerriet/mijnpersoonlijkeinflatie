@@ -16,7 +16,7 @@ import type {
  * Claude model used for the AI fallback. Pinned to the dated alias so a
  * future Haiku release does not silently change behaviour.
  */
-export const AI_MODEL_ID = "claude-haiku-4-5-20251001";
+export const AI_MODEL_ID = "claude-sonnet-4-5-20250929";
 
 /** Wait between the first failed call and the single retry (CLAUDE.md). */
 export const RETRY_DELAY_MS = 2_000;
