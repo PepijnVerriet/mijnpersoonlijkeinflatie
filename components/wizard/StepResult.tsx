@@ -7,8 +7,9 @@ import { Footer } from "@/components/ui/Footer";
 import { getCategory } from "@/lib/cbs/categories";
 import type { InflationCalculation } from "@/lib/inflation/types";
 import type { ShareParams } from "@/lib/share/text";
-import type { InflationMeta, ProcessResult } from "@/lib/wizard/types";
+import type { InflationMeta } from "@/lib/wizard/types";
 import { BreakdownBars } from "./result/BreakdownBars";
+import { BreakdownCards } from "./result/BreakdownCards";
 import { BreakdownTable } from "./result/BreakdownTable";
 import { CbsFallbackBanner } from "./result/CbsFallbackBanner";
 import { ComparisonBars } from "./result/ComparisonBars";
@@ -22,7 +23,6 @@ const NL_MONTHS = [
 ];
 
 interface StepResultProps {
-  result: ProcessResult;
   calculation: InflationCalculation | null;
   meta: InflationMeta | null;
   calculating: boolean;
@@ -57,7 +57,6 @@ function compareLabel(personal: number, reference: number): "boven" | "onder" | 
 }
 
 export function StepResult({
-  result,
   calculation,
   meta,
   calculating,
@@ -90,17 +89,11 @@ export function StepResult({
     );
   }
 
-  const totalTransactions = result.transactionCount;
-  const categorisedCount = result.transactions.filter(
-    (t) => t.category !== null,
-  ).length;
+  const totalTransactions = calculation.totalTransactions;
+  const categorisedCount = calculation.categorisedTransactions;
   const unknownCount = totalTransactions - categorisedCount;
-  const categorisedSpending = result.transactions
-    .filter((t) => t.category !== null)
-    .reduce((s, t) => s + t.amount, 0);
-  const uncategorisedSpending = result.transactions
-    .filter((t) => t.category === null)
-    .reduce((s, t) => s + t.amount, 0);
+  const categorisedSpending = calculation.totalSpending;
+  const uncategorisedSpending = calculation.uncategorizedSpending;
   const grossSpending = categorisedSpending + uncategorisedSpending;
   const countPct =
     totalTransactions > 0 ? (categorisedCount / totalTransactions) * 100 : 0;
@@ -247,10 +240,18 @@ export function StepResult({
             Volledige breakdown
           </h2>
         </div>
-        <BreakdownTable
-          breakdown={calculation.breakdown}
-          totalInflation={personal}
-        />
+        <div className="md:hidden">
+          <BreakdownCards
+            breakdown={calculation.breakdown}
+            totalInflation={personal}
+          />
+        </div>
+        <div className="hidden md:block">
+          <BreakdownTable
+            breakdown={calculation.breakdown}
+            totalInflation={personal}
+          />
+        </div>
       </section>
 
       {/* =============== TRANSPARENCY =============== */}
@@ -275,7 +276,7 @@ export function StepResult({
                 {euroPct.toFixed(1)} %
               </div>
               <div className="mt-1 text-[12px] text-ink-3">
-                Dekking in euro&apos;s ({countPct.toFixed(0)} % van transacties)
+                Categorisatie-dekking ({countPct.toFixed(0)} % van meegenomen transacties)
               </div>
             </div>
             <div>
