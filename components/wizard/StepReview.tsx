@@ -155,7 +155,71 @@ export function StepReview({
         </div>
       )}
 
-      <div className="mt-8 overflow-x-auto rounded-token border border-border bg-surface">
+      {/* === MOBILE (< md): card stack === */}
+      <div className="mt-8 grid gap-2 md:hidden">
+        {result.transactions.map((t) => {
+          const unk = t.category === null;
+          const excluded = excludedTransactionIds.has(t.id);
+          const dim = excluded ? "opacity-50 line-through" : "";
+          const toggleTitle = excluded
+            ? "Toon weer in berekening"
+            : "Sluit uit van berekening";
+          return (
+            <div
+              key={t.id}
+              className={`rounded-token border border-border p-4 ${
+                unk ? "bg-warn-soft/60" : "bg-surface"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className={`min-w-0 flex-1 ${dim}`}>
+                  <div className="font-mono text-[12px] text-ink-3">
+                    {fmtDate(t.date)} · {fmtAmount(t.amount)}
+                  </div>
+                  <div className="mt-1 break-words text-[14.5px] font-medium leading-[1.3] text-ink-1">
+                    {t.merchant ?? t.description.slice(0, 60)}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onToggleExclusion(t.id)}
+                  title={toggleTitle}
+                  aria-label={toggleTitle}
+                  aria-pressed={excluded}
+                  className={`grid h-9 w-9 shrink-0 place-items-center rounded-md transition-colors ${
+                    excluded
+                      ? "bg-surface-2 text-ink-1"
+                      : "text-ink-3 hover:bg-surface-2 hover:text-ink-1"
+                  }`}
+                >
+                  <XIcon size={14} />
+                </button>
+              </div>
+              <div
+                className={`mt-3 grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2.5 border-t border-border pt-3 text-[13px] ${dim}`}
+              >
+                <span className="text-ink-3">Categorie</span>
+                <span
+                  className={`min-w-0 inline-flex items-center gap-1.5 ${
+                    unk ? "italic text-warn" : "text-ink-2"
+                  }`}
+                >
+                  {unk && <WarnIcon size={11} />}
+                  <span className="truncate">{categoryShort(t.category)}</span>
+                  {unk && (
+                    <span className="shrink-0 text-ink-4">(controle nodig)</span>
+                  )}
+                </span>
+                <span className="text-ink-3">Bron</span>
+                <span className="min-w-0">{sourceBadge(t.categorySource)}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* === DESKTOP (>= md): table (unchanged) === */}
+      <div className="mt-8 hidden overflow-x-auto rounded-token border border-border bg-surface md:block">
         <table className="w-full min-w-[640px] border-collapse text-[13.5px]">
           <thead>
             <tr className="border-b border-border-strong">
