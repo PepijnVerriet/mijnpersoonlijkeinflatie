@@ -214,10 +214,12 @@ export function StepCorrect({
                   <button
                     type="button"
                     onClick={() => onToggleExclusion(t.id)}
+                    disabled={suggestionsLoading || submitting}
+                    aria-disabled={suggestionsLoading || submitting}
                     title={toggleTitle}
                     aria-label={toggleTitle}
                     aria-pressed={excluded}
-                    className={`grid h-9 w-9 shrink-0 place-items-center rounded-md transition-colors ${
+                    className={`grid h-9 w-9 shrink-0 place-items-center rounded-md transition-colors disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent ${
                       excluded
                         ? "bg-surface-2 text-ink-1"
                         : "text-ink-3 hover:bg-surface-2 hover:text-ink-1"
@@ -244,13 +246,23 @@ export function StepCorrect({
                     ))}
                   </select>
                   <span className="text-ink-3">AI denkt</span>
-                  <span
-                    className={`min-w-0 truncate text-ink-2 ${
-                      excluded ? "opacity-50" : ""
-                    }`}
-                  >
-                    {aiCat || "—"}
-                  </span>
+                  {suggestionsLoading ? (
+                    <span className="flex items-center gap-1.5 text-ink-3">
+                      <span
+                        className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-border border-t-accent"
+                        aria-hidden="true"
+                      />
+                      na…
+                    </span>
+                  ) : (
+                    <span
+                      className={`min-w-0 truncate text-ink-2 ${
+                        excluded ? "opacity-50" : ""
+                      }`}
+                    >
+                      {aiCat || "—"}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -273,9 +285,19 @@ export function StepCorrect({
                     <span className="mt-0.5">
                       <SparkIcon size={11} />
                     </span>
-                    <span>
-                      <span className="text-accent">AI denkt:</span> {aiCat}.
-                    </span>
+                    {suggestionsLoading ? (
+                      <span className="flex items-center gap-1.5">
+                        <span
+                          className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-border border-t-accent"
+                          aria-hidden="true"
+                        />
+                        <span>AI denkt na…</span>
+                      </span>
+                    ) : (
+                      <span>
+                        <span className="text-accent">AI denkt:</span> {aiCat}.
+                      </span>
+                    )}
                   </div>
                 </div>
                 <select
@@ -296,10 +318,12 @@ export function StepCorrect({
                 <button
                   type="button"
                   onClick={() => onToggleExclusion(t.id)}
+                  disabled={suggestionsLoading || submitting}
+                  aria-disabled={suggestionsLoading || submitting}
                   title={toggleTitle}
                   aria-label={toggleTitle}
                   aria-pressed={excluded}
-                  className={`grid h-7 w-7 place-items-center justify-self-end rounded-md transition-colors ${
+                  className={`grid h-7 w-7 place-items-center justify-self-end rounded-md transition-colors disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent ${
                     excluded
                       ? "bg-surface-2 text-ink-1"
                       : "text-ink-3 hover:bg-surface-2 hover:text-ink-1"
