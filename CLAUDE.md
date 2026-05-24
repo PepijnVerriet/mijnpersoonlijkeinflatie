@@ -262,7 +262,9 @@ Modulair opgebouwd in losse, onafhankelijke modules:
     - PDF: in-memory verwerking, geen disk-write
     - AI: stuurt counterpartyName + raw description naar Anthropic
       (NIET alleen merchants, zoals oude landing-page claim suggereerde)
-    - Geen cookies, geen analytics, geen localStorage
+    - Cookie-loze pageviews via Vercel Analytics (geanonimiseerd, geen
+      persistente identifier); geen cookies, geen localStorage, geen
+      sessionStorage
     - Corrections-log: uitgeschakeld voor productie via env-var
     - Anthropic retentie: 30 dagen standaard, geen training
     - CBS Open Data: anoniem fetch, geen identificatie van eindgebruiker
@@ -350,6 +352,11 @@ Voor v1: alleen Rabobank PDF rekeningafschriften.
 - v2: /share page eigen layout zonder Topbar/Footer voor een schonere
   redirect (nu wordt root layout volledig gerenderd voordat de meta-
   refresh kicked in; op trage devices een korte flash zichtbaar)
+- v2: 5 npm-audit vulnerabilities (1 moderate, 4 high) in Next 14.2.35
+  deps. Eerder geprobeerd `npm audit fix --force` te draaien, dat
+  bumpte Next ongevraagd naar 16.2.6 — teruggedraaid. Volgende keer:
+  losse sessie voor Next 14 → 15/16 migratie met breaking-change
+  audit, of selectief `npm audit fix` zonder --force.
 - v2: Web Share API files niet universeel ondersteund (sommige Android-
   browsers negeren files). Huidige fallback: share zonder file. Pas aan
   als feedback komt dat shares geen preview tonen.

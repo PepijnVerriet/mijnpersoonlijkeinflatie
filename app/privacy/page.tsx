@@ -99,12 +99,15 @@ export default function PrivacyPage() {
           </p>
         </Section>
 
-        <Section letter="E" title="Geen cookies, geen analytics">
+        <Section letter="E" title="Cookie-loze pageview-analytics">
           <p className="m-0">
             Deze app zet geen cookies, geen localStorage, geen sessionStorage.
-            Geen Google Analytics, geen Plausible, geen Vercel Analytics. We
-            weten niet wie je bent, hoe vaak je terugkomt, of welke knoppen je
-            indrukt.
+            Voor pageview-statistiek gebruiken we Vercel Analytics:
+            cookie-loos, met geanonimiseerde IP-adressen en zonder persistente
+            identifier per bezoeker. We zien geaggregeerd hoeveel mensen welke
+            pagina bezoeken, maar niet wie jij bent, hoe vaak je terugkomt of
+            welke knoppen je indrukt. Geen Google Analytics, geen Plausible,
+            geen Facebook Pixel.
           </p>
         </Section>
 
