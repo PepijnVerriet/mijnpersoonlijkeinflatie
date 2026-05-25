@@ -70,12 +70,150 @@ function ToneGlyph({ tone, color }: { tone: Tone; color: string }) {
   );
 }
 
+/**
+ * Generic OG card for non-share pages (homepage, /check, /faq, /privacy).
+ * Big π glyph + tagline. No personal/reference data.
+ */
+async function renderGenericCard(): Promise<Response> {
+  const [mediumFont, italicFont] = await Promise.all([
+    fetch(new URL("./fonts/SourceSerif4-Medium.woff", import.meta.url)).then(
+      (r) => r.arrayBuffer(),
+    ),
+    fetch(
+      new URL("./fonts/SourceSerif4-MediumItalic.woff", import.meta.url),
+    ).then((r) => r.arrayBuffer()),
+  ]);
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          backgroundColor: C.bg,
+          padding: "60px 72px",
+          fontFamily: '"Source Serif 4"',
+        }}
+      >
+        <div style={{ display: "flex" }}>
+          <span
+            style={{
+              fontSize: 20,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: C.ink3,
+            }}
+          >
+            Mijn Persoonlijke Inflatie
+          </span>
+        </div>
+
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 56,
+            marginTop: 12,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 360,
+              color: C.accent,
+              fontStyle: "italic",
+              lineHeight: 1,
+              fontFeatureSettings: '"ss01"',
+            }}
+          >
+            π
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: "1 1 0",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 60,
+                color: C.ink1,
+                letterSpacing: "-0.02em",
+                lineHeight: 1.08,
+              }}
+            >
+              De inflatie is voor iedereen
+            </div>
+            <div
+              style={{
+                fontSize: 60,
+                fontStyle: "italic",
+                color: C.accent,
+                letterSpacing: "-0.02em",
+                lineHeight: 1.08,
+              }}
+            >
+              anders.
+            </div>
+            <div
+              style={{
+                marginTop: 26,
+                fontSize: 30,
+                fontStyle: "italic",
+                color: C.ink2,
+              }}
+            >
+              Bereken het cijfer dat jij betaalt.
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            borderTop: `1px solid ${C.border}`,
+            paddingTop: 22,
+            fontSize: 18,
+            color: C.ink3,
+          }}
+        >
+          <span>mijnpersoonlijkeinflatie.nl</span>
+        </div>
+      </div>
+    ),
+    {
+      width: 1200,
+      height: 630,
+      fonts: [
+        {
+          name: "Source Serif 4",
+          data: mediumFont,
+          style: "normal",
+          weight: 500,
+        },
+        {
+          name: "Source Serif 4",
+          data: italicFont,
+          style: "italic",
+          weight: 500,
+        },
+      ],
+      headers: {
+        "Cache-Control": "public, max-age=86400, immutable",
+      },
+    },
+  );
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 
   const personalRaw = searchParams.get("personal");
   if (personalRaw === null) {
-    return new Response("Missing 'personal' parameter", { status: 400 });
+    return renderGenericCard();
   }
   const personal = parseFloat(personalRaw);
   if (!Number.isFinite(personal)) {

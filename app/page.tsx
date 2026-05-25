@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Topbar } from "@/components/ui/Topbar";
 import { Footer } from "@/components/ui/Footer";
@@ -7,6 +8,30 @@ import { MorphingHero } from "@/components/landing/MorphingHero";
 import { Faq } from "@/components/landing/Faq";
 import { getCbsProvider } from "@/lib/cbs";
 import { CbsDataNotAvailableError } from "@/lib/cbs/types";
+import { SITE_NAME } from "@/lib/seo/constants";
+
+const HOME_TITLE = `Bereken je persoonlijke inflatie · CBS-data en je afschrift`;
+const HOME_DESCRIPTION =
+  "Upload je Rabobank-PDF en bereken in twee minuten je eigen inflatie op basis van CBS-cijfers. Gratis, geen account, niets opgeslagen.";
+
+export const metadata: Metadata = {
+  title: HOME_TITLE,
+  description: HOME_DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    url: "/",
+    siteName: SITE_NAME,
+    locale: "nl_NL",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+  },
+};
 
 /**
  * Regenerate the landing page at most once per day. CBS publishes headlines

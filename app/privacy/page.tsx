@@ -1,10 +1,29 @@
+import type { Metadata } from "next";
 import { Topbar } from "@/components/ui/Topbar";
 import { Footer } from "@/components/ui/Footer";
+import { SITE_NAME } from "@/lib/seo/constants";
 
-export const metadata = {
-  title: "Privacy-verklaring | Mijn Persoonlijke Inflatie",
-  description:
-    "Eerlijk over wat we doen met je data: PDF-verwerking, AI-categorisering, hosting en jouw AVG-rechten.",
+const PRIVACY_TITLE = "Privacy-verklaring";
+const PRIVACY_DESCRIPTION =
+  "Eerlijk over wat we doen met je data: PDF-verwerking, AI-categorisering, hosting en jouw AVG-rechten.";
+
+export const metadata: Metadata = {
+  title: PRIVACY_TITLE,
+  description: PRIVACY_DESCRIPTION,
+  alternates: { canonical: "/privacy" },
+  openGraph: {
+    title: `${PRIVACY_TITLE} · ${SITE_NAME}`,
+    description: PRIVACY_DESCRIPTION,
+    url: "/privacy",
+    siteName: SITE_NAME,
+    locale: "nl_NL",
+    type: "article",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${PRIVACY_TITLE} · ${SITE_NAME}`,
+    description: PRIVACY_DESCRIPTION,
+  },
 };
 
 interface SectionProps {
